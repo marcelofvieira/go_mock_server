@@ -32,10 +32,11 @@ func Run() error {
 
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")
 	router.HandleFunc("/mock-config", mockConfigHandler.AddMockConfiguration).Methods("POST")
-	router.HandleFunc("/config-mock", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
+	router.HandleFunc("/mock-config", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
+	router.HandleFunc("/mock-config/{id}", mockConfigHandler.DeleteMockConfiguration).Methods("DELETE")
 
-	handlerprocessor := handlerprocessor.NewService(mockConfigRepository)
-	dynamicHandler := dynamichandler.NewHTTPHandler(handlerprocessor)
+	processorService := handlerprocessor.NewService(mockConfigRepository)
+	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
 
 	router.NotFoundHandler = http.HandlerFunc(dynamicHandler.ProcessDynamicHandler)
 

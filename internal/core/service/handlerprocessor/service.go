@@ -1,6 +1,7 @@
 package handlerprocessor
 
 import (
+	"context"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
 	"net/http"
@@ -16,9 +17,9 @@ func NewService(mockRepository ports.MockConfigurationRepository) *Service {
 	}
 }
 
-func (s *Service) ProcessDynamicHandler(request *http.Request) (interface{}, error) {
+func (s *Service) ProcessDynamicHandler(ctx context.Context, request *http.Request) (interface{}, error) {
 
-	mockConfig, err := s.mockRepository.GetAll()
+	mockConfig, err := s.mockRepository.GetAll(ctx)
 	if err != nil {
 		if apperrors.Is(err, apperrors.NotFound) {
 			return nil, apperrors.New(apperrors.NotImplemented, err, "handler not implemented")

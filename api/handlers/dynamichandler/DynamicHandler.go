@@ -18,10 +18,11 @@ func NewHTTPHandler(mockService ports.DynamicHandlerService) *HTTPHandler {
 }
 
 func (hdl *HTTPHandler) ProcessDynamicHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	httpStatus := http.StatusOK
 
-	handlerResponse, err := hdl.dynamicHandlerService.ProcessDynamicHandler(r)
+	handlerResponse, err := hdl.dynamicHandlerService.ProcessDynamicHandler(ctx, r)
 
 	if err != nil {
 		if apperrors.Is(err, apperrors.NotImplemented) {

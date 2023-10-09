@@ -1,16 +1,18 @@
 package ports
 
 import (
+	"context"
 	"mock_server_mux/internal/core/domain"
 	"net/http"
 )
 
 type MockConfigurationService interface {
-	GetMockConfigById(int) (domain.MockConfiguration, error)
-	AddNewMockConfiguration(domain.MockConfiguration) (domain.MockConfiguration, error)
-	UpdateMockConfiguration(domain.MockConfiguration) (domain.MockConfiguration, error)
+	GetMockConfigById(context.Context, int) (domain.MockConfiguration, error)
+	AddNewMockConfiguration(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
+	UpdateMockConfiguration(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
+	DeleteMockConfiguration(context.Context, int) error
 }
 
 type DynamicHandlerService interface {
-	ProcessDynamicHandler(*http.Request) (interface{}, error)
+	ProcessDynamicHandler(context.Context, *http.Request) (interface{}, error)
 }

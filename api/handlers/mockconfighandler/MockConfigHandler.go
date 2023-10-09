@@ -23,7 +23,7 @@ func NewHTTPHandler(mockService ports.MockConfigurationService) *HTTPHandler {
 
 func (hdl *HTTPHandler) GetMockConfiguration(w http.ResponseWriter, r *http.Request) {
 
-	//ctx := r.Context()
+	ctx := r.Context()
 
 	vars := mux.Vars(r)
 
@@ -33,7 +33,7 @@ func (hdl *HTTPHandler) GetMockConfiguration(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	configMock, err := hdl.mockConfigService.GetMockConfigById(Id)
+	configMock, err := hdl.mockConfigService.GetMockConfigById(ctx, Id)
 
 	if err != nil {
 		if apperrors.Is(err, apperrors.NotFound) {
@@ -48,13 +48,41 @@ func (hdl *HTTPHandler) GetMockConfiguration(w http.ResponseWriter, r *http.Requ
 
 }
 
+func (hdl *HTTPHandler) DeleteMockConfiguration(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	vars := mux.Vars(r)
+
+	Id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		response.Error(w, r, http.StatusBadRequest, apperrors.New(apperrors.BadRequest, err, "invalid id"))
+		return
+	}
+
+	err = hdl.mockConfigService.DeleteMockConfiguration(ctx, Id)
+
+	if err != nil {
+		if apperrors.Is(err, apperrors.NotFound) {
+			response.Error(w, r, http.StatusNotFound, err)
+		} else {
+			response.Error(w, r, http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	response.Success(w, r, http.StatusNoContent, nil)
+
+}
+
 func (hdl *HTTPHandler) AddMockConfiguration(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	body := domain.MockConfiguration{}
 	decode := json.NewDecoder(r.Body)
 	decode.Decode(&body)
 
-	configMock, err := hdl.mockConfigService.AddNewMockConfiguration(body)
+	configMock, err := hdl.mockConfigService.AddNewMockConfiguration(ctx, body)
 	if err != nil {
 		response.Error(w, r, http.StatusInternalServerError, err)
 		return
@@ -64,6 +92,7 @@ func (hdl *HTTPHandler) AddMockConfiguration(w http.ResponseWriter, r *http.Requ
 }
 
 func (hdl *HTTPHandler) UpdateMockConfiguration(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	body := domain.MockConfiguration{}
 
@@ -77,7 +106,7 @@ func (hdl *HTTPHandler) UpdateMockConfiguration(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	configMock, err := hdl.mockConfigService.UpdateMockConfiguration(body)
+	configMock, err := hdl.mockConfigService.UpdateMockConfiguration(ctx, body)
 	if err != nil {
 		err := response.Error(w, r, http.StatusInternalServerError, err)
 		if err != nil {
