@@ -27,12 +27,12 @@ type RequestMock struct {
 }
 
 type Header struct {
-	Name  string `json:"name"`
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 type QueryParameter struct {
-	Name  string `json:"name"`
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
@@ -45,7 +45,7 @@ type ResponseMock struct {
 	Configurations ResponseConfiguration `json:"configurations"`
 	StatusCode     int                   `json:"status"`
 	Headers        []Header              `json:"headers"`
-	Body           interface{}           `json:" body"`
+	Body           interface{}           `json:"body"`
 }
 
 type ResponseConfiguration struct {
@@ -97,14 +97,14 @@ func (rc RequestConfiguration) ToPresenter() presenter.RequestConfiguration {
 
 func (h Header) ToPresenter() presenter.Header {
 	return presenter.Header{
-		Name:  h.Name,
+		Key:   h.Key,
 		Value: h.Value,
 	}
 }
 
 func (qp QueryParameter) ToPresenter() presenter.QueryParameter {
 	return presenter.QueryParameter{
-		Name:  qp.Name,
+		Key:   qp.Key,
 		Value: qp.Value,
 	}
 }

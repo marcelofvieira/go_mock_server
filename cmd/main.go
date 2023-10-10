@@ -5,8 +5,9 @@ import (
 	"github.com/gorilla/mux"
 	"mock_server_mux/api/handlers/dynamichandler"
 	"mock_server_mux/api/handlers/mockconfighandler"
-	"mock_server_mux/internal/core/service/handlerprocessor"
+	"mock_server_mux/internal/core/service/dynamichandlerprocessor"
 	"mock_server_mux/internal/core/service/mockconfiguration"
+	"mock_server_mux/internal/core/service/requestfilter"
 	"mock_server_mux/internal/repository/mockconfigurationrepo"
 	_ "mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/logger"
@@ -35,7 +36,8 @@ func Run() error {
 	router.HandleFunc("/mock-config", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.DeleteMockConfiguration).Methods("DELETE")
 
-	processorService := handlerprocessor.NewService(mockConfigRepository)
+	filterHandlerService := requestfilter.NewService()
+	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService)
 	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
 
 	router.NotFoundHandler = http.HandlerFunc(dynamicHandler.ProcessDynamicHandler)

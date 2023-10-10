@@ -23,12 +23,12 @@ type RequestMock struct {
 }
 
 type Header struct {
-	Name  string `json:"name"`
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 type QueryParameter struct {
-	Name  string `json:"name"`
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
@@ -41,7 +41,7 @@ type ResponseMock struct {
 	Configurations ResponseConfiguration `json:"configurations"`
 	StatusCode     int                   `json:"status"`
 	Headers        []Header              `json:"headers"`
-	Body           interface{}           `json:" body"`
+	Body           interface{}           `json:"body"`
 }
 
 type ResponseConfiguration struct {

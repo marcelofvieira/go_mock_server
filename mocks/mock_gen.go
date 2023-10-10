@@ -16,7 +16,7 @@ func GetConfigMock1() domain.MockConfiguration {
 			URL:    "/example/[0-9]+/t1+$",
 			Headers: []domain.Header{
 				{
-					Name:  "Content-Type",
+					Key:   "Content-Type",
 					Value: "application/json",
 				},
 			},
@@ -29,7 +29,7 @@ func GetConfigMock1() domain.MockConfiguration {
 			StatusCode: 200,
 			Headers: []domain.Header{
 				{
-					Name:  "Content-Type",
+					Key:   "Content-Type",
 					Value: "application/json",
 				},
 			},
@@ -49,7 +49,7 @@ func GetConfigMock2() domain.MockConfiguration {
 			URL:    "/example/[A-Z][a-z]+/t2+$",
 			Headers: []domain.Header{
 				{
-					Name:  "Content-Type",
+					Key:   "Content-Type",
 					Value: "application/json",
 				},
 			},
@@ -63,7 +63,7 @@ func GetConfigMock2() domain.MockConfiguration {
 			StatusCode: http.StatusNotFound,
 			Headers: []domain.Header{
 				{
-					Name:  "Content-Type",
+					Key:   "Content-Type",
 					Value: "application/json",
 				},
 			},
