@@ -3,7 +3,7 @@ package logger
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -11,7 +11,7 @@ import (
 
 func BenchmarkDebugWithDebugLevel(b *testing.B) {
 	SetLogLevel("debug")
-	Log.Out = ioutil.Discard // Discard log output
+	Log.Out = io.Discard // Discard log output
 	for n := 0; n < b.N; n++ {
 		Debugf("Some message %s %s %s %s", "1", "2", "3", "4")
 	}
@@ -20,7 +20,7 @@ func BenchmarkDebugWithDebugLevel(b *testing.B) {
 
 func BenchmarkDebugWithInfoLevel(b *testing.B) {
 	SetLogLevel("info")
-	Log.Out = ioutil.Discard // Discard log output
+	Log.Out = io.Discard // Discard log output
 	for n := 0; n < b.N; n++ {
 		Debugf("Some message %s %s %s %s", "1", "2", "3", "4")
 	}
@@ -29,7 +29,7 @@ func BenchmarkDebugWithInfoLevel(b *testing.B) {
 
 func BenchmarkErrorWithErrorLevel(b *testing.B) {
 	SetLogLevel("error")
-	Log.Out = ioutil.Discard // Discard log output
+	Log.Out = io.Discard // Discard log output
 	for n := 0; n < b.N; n++ {
 		Errorf("Some message %s %s %s %s", errors.New("some error"), "1", "2", "3", "4")
 	}
@@ -38,7 +38,7 @@ func BenchmarkErrorWithErrorLevel(b *testing.B) {
 
 func BenchmarkErrorWithPanicLevel(b *testing.B) {
 	SetLogLevel("panic")
-	Log.Out = ioutil.Discard // Discard log output
+	Log.Out = io.Discard // Discard log output
 	for n := 0; n < b.N; n++ {
 		Errorf("Some message %s %s %s %s", errors.New("some error"), "1", "2", "3", "4")
 	}

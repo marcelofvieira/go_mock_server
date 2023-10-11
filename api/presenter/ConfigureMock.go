@@ -18,7 +18,7 @@ type RequestMock struct {
 	URL                  string               `json:"url"`
 	Headers              []Header             `json:"headers"`
 	QueryParameters      []QueryParameter     `json:"query_parameters"`
-	Body                 string               `json:"body"`
+	Body                 interface{}          `json:"body"`
 	RequestConfiguration RequestConfiguration `json:"request_configuration"`
 }
 

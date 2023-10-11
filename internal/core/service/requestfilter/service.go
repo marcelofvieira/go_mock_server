@@ -2,8 +2,12 @@ package requestfilter
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/apperrors"
+	"mock_server_mux/pkg/stringutils"
 	"net/http"
 	"regexp"
 )
@@ -29,12 +33,15 @@ func (s *Service) FilterMockHandlersByRequest(ctx context.Context, request *http
 			continue
 		}
 
-		result, found = filterByQueryHeader(request, result)
+		result, found = filterByHeader(request, result)
 		if !found {
 			continue
 		}
 
-		//result, found = s.filterByQueryBody(body, result)
+		result, found = filterByBody(request, result)
+		if !found {
+			continue
+		}
 
 		filteredMockConfigurations = append(filteredMockConfigurations, result)
 	}
@@ -55,8 +62,10 @@ func filterByMethodAndLiteralPath(request *http.Request, configuration domain.Mo
 		return configuration, true
 	}
 
-	if findStringRegex(configuration.Request.Method+" "+configuration.Request.URL,
-		method+" "+path) {
+	pattern := configuration.Request.Method + " " + configuration.Request.URL
+	findString := method + " " + path
+
+	if findStringRegex(pattern, findString) {
 		return configuration, true
 	}
 
@@ -74,7 +83,6 @@ func filterByQueryParam(request *http.Request, configuration domain.MockConfigur
 		queryParamValue := request.URL.Query().Get(queryParam.Key)
 
 		if queryParamValue != queryParam.Value {
-
 			if !findStringRegex(queryParam.Value, queryParamValue) {
 				return domain.MockConfiguration{}, false
 			}
@@ -90,7 +98,7 @@ func findStringRegex(pattern, text string) bool {
 	return validRegex.MatchString(text)
 }
 
-func filterByQueryHeader(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
+func filterByHeader(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
 
 	if len(configuration.Request.Headers) == 0 {
 		return configuration, true
@@ -110,4 +118,38 @@ func filterByQueryHeader(request *http.Request, configuration domain.MockConfigu
 
 	return configuration, true
 
+}
+
+func filterByBody(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		//TODO: log error
+		return domain.MockConfiguration{}, false
+	}
+
+	requestBody := prepareBody(string(body))
+
+	jsonBytes, err := json.Marshal(configuration.Request.Body)
+	if err != nil {
+		fmt.Println("Error encoding to JSON:", err)
+	}
+
+	mockBody := prepareBody(string(jsonBytes))
+
+	if requestBody != mockBody {
+		if !findStringRegex(mockBody, requestBody) {
+			return domain.MockConfiguration{}, false
+		}
+	}
+
+	return configuration, true
+}
+
+func prepareBody(body string) string {
+
+	body = stringutils.ReplaceTabsToSpaces(body)
+	body = stringutils.ReplaceNewLinesToSpaces(body)
+	body = stringutils.RemoveSpaces(body)
+
+	return body
 }
