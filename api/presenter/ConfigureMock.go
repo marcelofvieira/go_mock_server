@@ -1,16 +1,17 @@
 package presenter
 
+type MockType int
+
 type MockConfiguration struct {
 	Id       int          `json:"id"`
-	Name     string       `json:"name"`
 	Info     Info         `json:"info"`
 	Request  RequestMock  `json:"request"`
 	Response ResponseMock `json:"response"`
 }
 
 type Info struct {
-	TestGroup string `json:"test_group"`
 	TestName  string `json:"test_name"`
+	TestGroup string `json:"test_group"`
 }
 
 type RequestMock struct {

@@ -4,17 +4,30 @@ import (
 	"mock_server_mux/api/presenter"
 )
 
+type MockType int
+
+type Variable struct {
+	Name        string
+	ValueBefore string
+	ValueAfter  string
+}
+
+const (
+	Literal MockType = iota
+	Regex   MockType = iota
+)
+
 type MockConfiguration struct {
 	Id       int          `json:"id"`
-	Name     string       `json:"name"`
 	Info     Info         `json:"info"`
 	Request  RequestMock  `json:"request"`
 	Response ResponseMock `json:"response"`
 }
 
 type Info struct {
-	TestGroup string `json:"test_group"`
-	TestName  string `json:"test_name"`
+	TestName  string   `json:"test_name"`
+	TestGroup string   `json:"test_group"`
+	MockType  MockType `json:"mock_type"`
 }
 
 type RequestMock struct {
@@ -24,6 +37,7 @@ type RequestMock struct {
 	QueryParameters      []QueryParameter     `json:"query_parameters"`
 	Body                 interface{}          `json:"body"`
 	RequestConfiguration RequestConfiguration `json:"request_configuration"`
+	Variables            []Variable           `json:"variables"`
 }
 
 type Header struct {
@@ -55,7 +69,6 @@ type ResponseConfiguration struct {
 func (mc MockConfiguration) ToPresenter() presenter.MockConfiguration {
 	return presenter.MockConfiguration{
 		Id:       mc.Id,
-		Name:     mc.Name,
 		Info:     mc.Info.ToPresenter(),
 		Request:  mc.Request.ToPresenter(),
 		Response: mc.Response.ToPresenter(),
@@ -64,8 +77,8 @@ func (mc MockConfiguration) ToPresenter() presenter.MockConfiguration {
 
 func (i Info) ToPresenter() presenter.Info {
 	return presenter.Info{
-		TestGroup: i.TestGroup,
 		TestName:  i.TestName,
+		TestGroup: i.TestGroup,
 	}
 }
 

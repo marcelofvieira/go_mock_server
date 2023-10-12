@@ -27,6 +27,9 @@ func Run() error {
 
 	router := mux.NewRouter()
 
+	// ----------------------------------------------------------------------------------------------------------------
+	// Mock Configuration Handler
+	// ----------------------------------------------------------------------------------------------------------------
 	mockConfigRepository := mockconfigurationrepo.NewMemKVS()
 	configMockService := mockconfiguration.NewService(mockConfigRepository)
 	mockConfigHandler := mockconfighandler.NewHTTPHandler(configMockService)
@@ -36,12 +39,18 @@ func Run() error {
 	router.HandleFunc("/mock-config", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.DeleteMockConfiguration).Methods("DELETE")
 
+	// ----------------------------------------------------------------------------------------------------------------
+	// Dynamic Handler
+	// ----------------------------------------------------------------------------------------------------------------
 	filterHandlerService := requestfilter.NewService()
 	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService)
 	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
 
 	router.NotFoundHandler = http.HandlerFunc(dynamicHandler.ProcessDynamicHandler)
 
+	// ----------------------------------------------------------------------------------------------------------------
+	// Dynamic Handler
+	// ----------------------------------------------------------------------------------------------------------------
 	http.Handle("/", router)
 
 	err := http.ListenAndServe(":8080", nil)
@@ -50,51 +59,4 @@ func Run() error {
 	}
 
 	return nil
-
 }
-
-/*
-func getMockByIdHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "GET BY Id")
-}
-
-func getMockHandler(w http.ResponseWriter, r *http.Request) {
-	FormatResponse(w, r, http.StatusOK, customRoutes)
-}
-
-func genericHandler(w http.ResponseWriter, r *http.Request, configMock domain.MockConfiguration) {
-
-	FormatResponse(w, r, configMock.Response.StatusCode, configMock.Response.Body)
-
-}
-
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	route := r.Method + " " + r.URL.Path
-
-	bodyBytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bodyString := string(bodyBytes)
-
-	fmt.Println(bodyString)
-
-	for _, configMock := range customRoutes {
-
-		pattern := configMock.Request.Method + " " + configMock.Request.URL
-
-		validRegex := regexp.MustCompile(pattern)
-
-		if validRegex.MatchString(route) {
-			genericHandler(w, r, configMock)
-			return
-		}
-	}
-
-	FormatResponse(w, r, http.StatusBadRequest, "{'status': 'not found'}")
-
-	//http.NotFoundHandler().ServeHTTP(w, r)
-
-}
-*/
