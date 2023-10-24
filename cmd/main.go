@@ -8,6 +8,7 @@ import (
 	"mock_server_mux/internal/core/service/dynamichandlerprocessor"
 	"mock_server_mux/internal/core/service/mockconfiguration"
 	"mock_server_mux/internal/core/service/requestfilter"
+	"mock_server_mux/internal/core/service/requestpreprocessor"
 	"mock_server_mux/internal/repository/mockconfigurationrepo"
 	_ "mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/logger"
@@ -31,7 +32,9 @@ func Run() error {
 	// Mock Configuration Handler
 	// ----------------------------------------------------------------------------------------------------------------
 	mockConfigRepository := mockconfigurationrepo.NewMemKVS()
-	configMockService := mockconfiguration.NewService(mockConfigRepository)
+	mockRequestPreProcessorService := requestpreprocessor.NewService()
+
+	configMockService := mockconfiguration.NewService(mockConfigRepository, mockRequestPreProcessorService)
 	mockConfigHandler := mockconfighandler.NewHTTPHandler(configMockService)
 
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")

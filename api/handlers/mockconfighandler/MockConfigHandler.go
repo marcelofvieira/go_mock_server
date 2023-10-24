@@ -3,6 +3,7 @@ package mockconfighandler
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"mock_server_mux/api/presenter"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
@@ -33,7 +34,7 @@ func (hdl *HTTPHandler) GetMockConfiguration(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	configMock, err := hdl.mockConfigService.GetMockConfigById(ctx, Id)
+	mockConfiguration, err := hdl.mockConfigService.GetMockConfigById(ctx, Id)
 
 	if err != nil {
 		if apperrors.Is(err, apperrors.NotFound) {
@@ -44,7 +45,13 @@ func (hdl *HTTPHandler) GetMockConfiguration(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	response.Success(w, r, http.StatusOK, configMock.ToPresenter())
+	responseBody, err := convertToPresenter(mockConfiguration)
+	if err != nil {
+		response.Error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.Success(w, r, http.StatusOK, responseBody)
 
 }
 
@@ -82,13 +89,19 @@ func (hdl *HTTPHandler) AddMockConfiguration(w http.ResponseWriter, r *http.Requ
 	decode := json.NewDecoder(r.Body)
 	decode.Decode(&body)
 
-	configMock, err := hdl.mockConfigService.AddNewMockConfiguration(ctx, body)
+	mockConfiguration, err := hdl.mockConfigService.AddNewMockConfiguration(ctx, body)
 	if err != nil {
 		response.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	response.Success(w, r, http.StatusCreated, configMock.ToPresenter())
+	responseBody, err := convertToPresenter(mockConfiguration)
+	if err != nil {
+		response.Error(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.Success(w, r, http.StatusCreated, responseBody)
 }
 
 func (hdl *HTTPHandler) UpdateMockConfiguration(w http.ResponseWriter, r *http.Request) {
@@ -106,7 +119,7 @@ func (hdl *HTTPHandler) UpdateMockConfiguration(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	configMock, err := hdl.mockConfigService.UpdateMockConfiguration(ctx, body)
+	mockConfiguration, err := hdl.mockConfigService.UpdateMockConfiguration(ctx, body)
 	if err != nil {
 		err := response.Error(w, r, http.StatusInternalServerError, err)
 		if err != nil {
@@ -115,8 +128,29 @@ func (hdl *HTTPHandler) UpdateMockConfiguration(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = response.Success(w, r, http.StatusCreated, configMock.ToPresenter())
+	responseBody, err := convertToPresenter(mockConfiguration)
 	if err != nil {
+		response.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	response.Success(w, r, http.StatusOK, responseBody)
+
+}
+
+func convertToPresenter(mockConfig domain.MockConfiguration) (presenter.MockConfiguration, error) {
+
+	jsonResp, err := json.Marshal(mockConfig)
+	if err != nil {
+		return presenter.MockConfiguration{}, err
+	}
+
+	responseBody := presenter.MockConfiguration{}
+
+	err = json.Unmarshal(jsonResp, &responseBody)
+	if err != nil {
+		return presenter.MockConfiguration{}, err
+	}
+
+	return responseBody, nil
 }

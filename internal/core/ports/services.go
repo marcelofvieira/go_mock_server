@@ -13,6 +13,10 @@ type MockConfigurationService interface {
 	DeleteMockConfiguration(context.Context, int) error
 }
 
+type MockRequestPreProcessorService interface {
+	ProcessRequestParams(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
+}
+
 type DynamicHandlerService interface {
 	ProcessDynamicHandler(context.Context, *http.Request) (interface{}, error)
 }

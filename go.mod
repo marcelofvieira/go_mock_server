@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/devfeel/mapper v0.7.13 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 )
