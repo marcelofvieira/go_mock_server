@@ -1,6 +1,23 @@
 package stringutils
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+func FindStringRegex(pattern, text string) bool {
+	validRegex := regexp.MustCompile(pattern)
+
+	return validRegex.MatchString(text)
+}
+
+func FindStringValuesRegex(pattern, text string) (bool, []string) {
+	validRegex := regexp.MustCompile(pattern)
+
+	matches := validRegex.FindStringSubmatch(text)
+
+	return len(matches) > 0, matches
+}
 
 func ReplaceTabsToSpaces(str string) string {
 	return strings.ReplaceAll(str, "\t", " ")

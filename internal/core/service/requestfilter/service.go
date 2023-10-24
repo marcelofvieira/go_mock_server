@@ -9,7 +9,6 @@ import (
 	"mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/stringutils"
 	"net/http"
-	"regexp"
 )
 
 type Service struct{}
@@ -23,7 +22,7 @@ func (s *Service) FilterMockHandlersByRequest(ctx context.Context, request *http
 	var filteredMockConfigurations []domain.MockConfiguration
 
 	for _, mockConfig := range mockConfigurations {
-		result, found := filterByMethodAndLiteralPath(request, mockConfig)
+		result, found := filterByMethodAndPath(request, mockConfig)
 		if !found {
 			continue
 		}
@@ -50,10 +49,13 @@ func (s *Service) FilterMockHandlersByRequest(ctx context.Context, request *http
 		return domain.MockConfiguration{}, apperrors.New(apperrors.NotFound, nil, "not found handler")
 	}
 
+	//TODO: Sort resutlt
+	//TODO: Find the best match
+
 	return filteredMockConfigurations[0], nil
 }
 
-func filterByMethodAndLiteralPath(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
+func filterByMethodAndPath(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
 
 	path := request.URL.Path
 	method := request.Method
@@ -65,7 +67,7 @@ func filterByMethodAndLiteralPath(request *http.Request, configuration domain.Mo
 	pattern := configuration.Request.Method + " " + configuration.Request.URL
 	findString := method + " " + path
 
-	if findStringRegex(pattern, findString) {
+	if stringutils.FindStringRegex(pattern, findString) {
 		return configuration, true
 	}
 
@@ -83,19 +85,13 @@ func filterByQueryParam(request *http.Request, configuration domain.MockConfigur
 		queryParamValue := request.URL.Query().Get(queryParam.Key)
 
 		if queryParamValue != queryParam.Value {
-			if !findStringRegex(queryParam.Value, queryParamValue) {
+			if !stringutils.FindStringRegex(queryParam.Value, queryParamValue) {
 				return domain.MockConfiguration{}, false
 			}
 		}
 	}
 
 	return configuration, true
-}
-
-func findStringRegex(pattern, text string) bool {
-	validRegex := regexp.MustCompile(pattern)
-
-	return validRegex.MatchString(text)
 }
 
 func filterByHeader(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
@@ -110,7 +106,7 @@ func filterByHeader(request *http.Request, configuration domain.MockConfiguratio
 
 		if headerValue != header.Value {
 
-			if !findStringRegex(header.Value, headerValue) {
+			if !stringutils.FindStringRegex(header.Value, headerValue) {
 				return domain.MockConfiguration{}, false
 			}
 		}
@@ -137,7 +133,7 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 	mockBody := prepareBody(string(jsonBytes))
 
 	if requestBody != mockBody {
-		if !findStringRegex(mockBody, requestBody) {
+		if !stringutils.FindStringRegex(mockBody, requestBody) {
 			return domain.MockConfiguration{}, false
 		}
 	}
