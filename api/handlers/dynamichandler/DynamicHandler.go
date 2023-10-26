@@ -43,7 +43,7 @@ func (hdl *HTTPHandler) ProcessDynamicHandler(w http.ResponseWriter, r *http.Req
 
 	httpStatus, headers, body, delay := processMockResponse(handlerResponse)
 
-	err = response.ProcessMockResponse(w, r, httpStatus, headers, body, delay)
+	err = response.MockResponse(w, r, httpStatus, headers, body, delay)
 	if err != nil {
 		return
 	}
