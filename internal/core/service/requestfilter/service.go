@@ -3,10 +3,10 @@ package requestfilter
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/apperrors"
+	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/stringutils"
 	"net/http"
 )
@@ -119,7 +119,7 @@ func filterByHeader(request *http.Request, configuration domain.MockConfiguratio
 func filterByBody(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		//TODO: log error
+		logger.Error("Error reading body", err)
 		return domain.MockConfiguration{}, false
 	}
 
@@ -127,7 +127,8 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 
 	jsonBytes, err := json.Marshal(configuration.Request.Body)
 	if err != nil {
-		fmt.Println("Error encoding to JSON:", err)
+		logger.Error("Error encoding to JSON", err)
+		return domain.MockConfiguration{}, false
 	}
 
 	mockBody := prepareBody(string(jsonBytes))
