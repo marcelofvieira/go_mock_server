@@ -1,8 +1,10 @@
 package dynamichandler
 
 import (
+	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
+	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/response"
 	"net/http"
 )
@@ -30,15 +32,47 @@ func (hdl *HTTPHandler) ProcessDynamicHandler(w http.ResponseWriter, r *http.Req
 		} else {
 			httpStatus = http.StatusInternalServerError
 		}
+
 		err := response.Error(w, r, httpStatus, err)
 		if err != nil {
-			return
+			logger.Error("Error: ", err)
 		}
+
 		return
 	}
 
-	err = response.Success(w, r, httpStatus, handlerResponse)
+	httpStatus, headers, body, delay := processMockResponse(handlerResponse)
+
+	err = response.ProcessMockResponse(w, r, httpStatus, headers, body, delay)
 	if err != nil {
 		return
 	}
+
+}
+
+func processMockResponse(mockConfig domain.MockConfiguration) (int, map[string]string, interface{}, int) {
+
+	statusCode := 0
+	headers := make(map[string]string)
+	delay := 0
+
+	statusCode = mockConfig.Response.StatusCode
+
+	if http.StatusText(mockConfig.Response.StatusCode) == "" {
+		statusCode = http.StatusOK
+	}
+
+	body := mockConfig.Response.Body
+
+	for _, header := range mockConfig.Response.Headers {
+		headers[header.Key] = header.Value
+	}
+
+	delay = mockConfig.Response.Configuration.ResponseDelay
+
+	if delay <= 0 || delay >= 20000 {
+		delay = 50
+	}
+
+	return statusCode, headers, body, delay
 }

@@ -18,7 +18,7 @@ type MockRequestPreProcessorService interface {
 }
 
 type DynamicHandlerService interface {
-	ProcessDynamicHandler(context.Context, *http.Request) (interface{}, error)
+	ProcessDynamicHandler(context.Context, *http.Request) (domain.MockConfiguration, error)
 }
 
 type RequestFilterService interface {
