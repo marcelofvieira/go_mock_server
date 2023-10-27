@@ -3,15 +3,10 @@ package domain
 type MockType int
 
 type Variable struct {
-	Name        string
-	ValueBefore string
-	ValueAfter  string
+	Name    string `json:"name,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Context string `json:"context,omitempty"`
 }
-
-const (
-	Literal MockType = iota
-	Regex   MockType = iota
-)
 
 type MockConfiguration struct {
 	Id       int          `json:"id"`
@@ -21,14 +16,14 @@ type MockConfiguration struct {
 }
 
 type Info struct {
-	TestName  string   `json:"test_name"`
-	TestGroup string   `json:"test_group"`
-	MockType  MockType `json:"mock_type"`
+	TestName  string `json:"test_name"`
+	TestGroup string `json:"test_group"`
 }
 
 type RequestMock struct {
 	Method          string               `json:"method"`
 	URL             string               `json:"url"`
+	RegexURL        string               `json:"regex_url"`
 	Headers         []Header             `json:"headers"`
 	QueryParameters []QueryParameter     `json:"query_parameters"`
 	Body            interface{}          `json:"body"`

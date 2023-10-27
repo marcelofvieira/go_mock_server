@@ -45,18 +45,19 @@ func MockResponse(resp http.ResponseWriter, req *http.Request, httpStatus int, h
 }
 
 func Success(w http.ResponseWriter, r *http.Request, statusCode int, body interface{}) error {
-
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		http.NotFound(w, r)
 		return nil
 	}
 
+	if body != nil {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	}
+
 	w.WriteHeader(statusCode)
 
 	if body != nil {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
 		jsonResp, err := json.Marshal(body)
 		if err != nil {
 			return err

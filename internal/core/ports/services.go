@@ -14,7 +14,7 @@ type MockConfigurationService interface {
 }
 
 type MockRequestPreProcessorService interface {
-	ProcessRequestParams(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
+	ProcessMockParameters(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
 }
 
 type DynamicHandlerService interface {

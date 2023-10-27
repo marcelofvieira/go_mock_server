@@ -3,9 +3,9 @@ package presenter
 type MockType int
 
 type Variable struct {
-	Name        string
-	ValueBefore string
-	ValueAfter  string
+	Name    string `json:"name,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Context string `json:"context,omitempty"`
 }
 
 type MockConfiguration struct {
@@ -23,6 +23,7 @@ type Info struct {
 type RequestMock struct {
 	Method          string               `json:"method,omitempty"`
 	URL             string               `json:"url,omitempty"`
+	RegexURL        string               `json:"regex_url,omitempty"`
 	Headers         []Header             `json:"headers,omitempty"`
 	QueryParameters []QueryParameter     `json:"query_parameters,omitempty"`
 	Body            interface{}          `json:"body,omitempty"`

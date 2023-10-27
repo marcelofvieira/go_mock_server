@@ -33,7 +33,6 @@ func RemoveSpaces(str string) string {
 }
 
 func BetweenPosition(value string, a int, b int) string {
-
 	return value[a:b]
 }
 

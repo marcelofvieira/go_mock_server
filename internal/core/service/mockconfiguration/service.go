@@ -41,7 +41,7 @@ func (s *Service) DeleteMockConfiguration(ctx context.Context, Id int) error {
 
 func (s *Service) AddNewMockConfiguration(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
 
-	mockConfig, err := s.mockRequestPreProcessor.ProcessRequestParams(ctx, mockConfig)
+	mockConfig, err := s.mockRequestPreProcessor.ProcessMockParameters(ctx, mockConfig)
 	if err != nil {
 		return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "Error to process request params")
 	}
