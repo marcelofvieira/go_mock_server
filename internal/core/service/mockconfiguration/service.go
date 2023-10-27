@@ -46,14 +46,12 @@ func (s *Service) AddNewMockConfiguration(ctx context.Context, mockConfig domain
 		return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "Error to process request params")
 	}
 
-	mockConfigP, err := processUrlConfiguration(ctx, mockConfig)
-
-	mockConfigP, err = s.mockRepository.Save(ctx, mockConfigP)
+	mockConfig, err = s.mockRepository.Save(ctx, mockConfig)
 	if err != nil {
 		return domain.MockConfiguration{}, errors.New("create mock configuration into repository has failed")
 	}
 
-	return mockConfigP, nil
+	return mockConfig, nil
 }
 
 func (s *Service) UpdateMockConfiguration(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
@@ -62,33 +60,6 @@ func (s *Service) UpdateMockConfiguration(ctx context.Context, mockConfig domain
 	if err != nil {
 		return domain.MockConfiguration{}, errors.New("update mock configuration into repository has failed")
 	}
-
-	return mockConfig, nil
-}
-
-func processUrlConfiguration(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
-
-	variables := make([]domain.Variable, 0)
-
-	URL := mockConfig.Request.URL
-
-	initPos := -1
-
-	for index, char := range URL {
-
-		if char == '{' {
-			initPos = index + 1
-		}
-
-		if char == '}' {
-			variables = append(variables, domain.Variable{Name: URL[initPos:index]})
-
-			initPos = -1
-		}
-
-	}
-
-	mockConfig.Request.Variables = variables
 
 	return mockConfig, nil
 }
