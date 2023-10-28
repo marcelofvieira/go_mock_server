@@ -148,5 +148,9 @@ func prepareBody(body string) string {
 	body = stringutils.ReplaceNewLinesToSpaces(body)
 	body = stringutils.RemoveSpaces(body)
 
+	if body == "null" {
+		return ""
+	}
+
 	return body
 }

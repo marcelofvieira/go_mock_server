@@ -30,7 +30,7 @@ func (s *Service) ProcessDynamicHandler(ctx context.Context, request *http.Reque
 		}
 	}
 
-	result, err := s.requestFilterService.FilterMockHandlersByRequest(ctx, request, allMockConfig)
+	mockConfig, err := s.requestFilterService.FilterMockHandlersByRequest(ctx, request, allMockConfig)
 	if err != nil {
 		if apperrors.Is(err, apperrors.NotFound) {
 			return domain.MockConfiguration{}, apperrors.New(apperrors.NotImplemented, err, "handler not implemented")
@@ -39,5 +39,14 @@ func (s *Service) ProcessDynamicHandler(ctx context.Context, request *http.Reque
 		}
 	}
 
-	return result, nil
+	//TODO: set variables in mock response
+	mockConfig = s.processMockParameters(mockConfig)
+
+	return mockConfig, nil
+}
+
+func (s *Service) processMockParameters(mockConfig domain.MockConfiguration) domain.MockConfiguration {
+
+	return mockConfig
+
 }

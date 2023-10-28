@@ -1,6 +1,7 @@
 package dynamichandler
 
 import (
+	"encoding/json"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
@@ -45,12 +46,16 @@ func (hdl *HTTPHandler) ProcessDynamicHandler(w http.ResponseWriter, r *http.Req
 
 	err = response.MockResponse(w, r, httpStatus, headers, body, delay)
 	if err != nil {
-		return
+		response.Error(w, r, httpStatus, err)
+		if err != nil {
+			logger.Error("Error: ", err)
+		}
 	}
 
 }
 
-func processMockResponse(mockConfig domain.MockConfiguration) (int, map[string]string, interface{}, int) {
+func processMockResponse(mockConfig domain.MockConfiguration) (int, map[string]string, []byte, int) {
+	var body []byte
 
 	statusCode := 0
 	headers := make(map[string]string)
@@ -62,7 +67,12 @@ func processMockResponse(mockConfig domain.MockConfiguration) (int, map[string]s
 		statusCode = http.StatusOK
 	}
 
-	body := mockConfig.Response.Body
+	payload, err := processMockPayload(mockConfig.Response.Body)
+	if err == nil {
+		body = payload
+	} else {
+		body = []byte(mockConfig.Response.Body.(string))
+	}
 
 	for _, header := range mockConfig.Response.Headers {
 		headers[header.Key] = header.Value
@@ -75,4 +85,34 @@ func processMockResponse(mockConfig domain.MockConfiguration) (int, map[string]s
 	}
 
 	return statusCode, headers, body, delay
+}
+
+func processMockPayload(body interface{}) ([]byte, error) {
+	var payload []byte
+	var err error
+
+	switch body.(type) {
+	case string:
+		var jsonData interface{}
+
+		err = json.Unmarshal([]byte(body.(string)), &jsonData)
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err = json.MarshalIndent(jsonData, "", "\t")
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		payload, err = json.Marshal(body)
+
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	return payload, nil
 }

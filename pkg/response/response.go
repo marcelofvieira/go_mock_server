@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func MockResponse(resp http.ResponseWriter, req *http.Request, httpStatus int, headers map[string]string, body interface{}, delay int) error {
+func MockResponse(resp http.ResponseWriter, req *http.Request, httpStatus int, headers map[string]string, body []byte, delay int) error {
 
 	if delay > 0 {
 		time.Sleep(time.Duration(delay) * time.Millisecond)
@@ -27,16 +27,7 @@ func MockResponse(resp http.ResponseWriter, req *http.Request, httpStatus int, h
 	resp.WriteHeader(httpStatus)
 
 	if body != nil {
-		jsonResp, err := json.Marshal(body)
-		if err != nil {
-			return err
-		}
-
-		if _, err := resp.Write(jsonResp); err != nil {
-			return err
-		}
-	} else {
-		resp.Write(nil)
+		resp.Write(body)
 	}
 
 	flusher.Flush()
