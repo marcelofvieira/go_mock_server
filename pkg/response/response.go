@@ -5,14 +5,9 @@ import (
 	"mock_server_mux/api/presenter"
 	"mock_server_mux/pkg/apperrors"
 	"net/http"
-	"time"
 )
 
-func MockResponse(resp http.ResponseWriter, req *http.Request, httpStatus int, headers map[string]string, body []byte, delay int) error {
-
-	if delay > 0 {
-		time.Sleep(time.Duration(delay) * time.Millisecond)
-	}
+func MockResponse(resp http.ResponseWriter, req *http.Request, httpStatus int, headers map[string]string, body []byte) error {
 
 	flusher, ok := resp.(http.Flusher)
 	if !ok {

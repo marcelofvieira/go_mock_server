@@ -8,6 +8,7 @@ import (
 	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/response"
 	"net/http"
+	"time"
 )
 
 type HTTPHandler struct {
@@ -42,9 +43,9 @@ func (hdl *HTTPHandler) ProcessDynamicHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	httpStatus, headers, body, delay := processMockResponse(handlerResponse)
+	httpStatus, headers, body := processMockConfigurationResponse(handlerResponse)
 
-	err = response.MockResponse(w, r, httpStatus, headers, body, delay)
+	err = response.MockResponse(w, r, httpStatus, headers, body)
 	if err != nil {
 		response.Error(w, r, httpStatus, err)
 		if err != nil {
@@ -54,65 +55,72 @@ func (hdl *HTTPHandler) ProcessDynamicHandler(w http.ResponseWriter, r *http.Req
 
 }
 
-func processMockResponse(mockConfig domain.MockConfiguration) (int, map[string]string, []byte, int) {
-	var body []byte
+func processMockConfigurationResponse(mockConfig domain.MockConfiguration) (int, map[string]string, []byte) {
+	statusCode := processMockHttpStatus(mockConfig)
 
-	statusCode := 0
-	headers := make(map[string]string)
-	delay := 0
+	headers := processMockHeaders(mockConfig)
 
-	statusCode = mockConfig.Response.StatusCode
+	payload := processMockPayload(mockConfig)
 
+	processMockDelay(mockConfig)
+
+	return statusCode, headers, payload
+}
+
+func processMockHttpStatus(mockConfig domain.MockConfiguration) int {
 	if http.StatusText(mockConfig.Response.StatusCode) == "" {
-		statusCode = http.StatusOK
+		return http.StatusOK
 	}
 
-	payload, err := processMockPayload(mockConfig.Response.Body)
-	if err == nil {
-		body = payload
-	} else {
-		body = []byte(mockConfig.Response.Body.(string))
-	}
+	return mockConfig.Response.StatusCode
+}
+
+func processMockHeaders(mockConfig domain.MockConfiguration) map[string]string {
+	headers := make(map[string]string)
 
 	for _, header := range mockConfig.Response.Headers {
 		headers[header.Key] = header.Value
 	}
 
-	delay = mockConfig.Response.Configuration.ResponseDelay
+	return headers
+}
+
+func processMockPayload(mockConfig domain.MockConfiguration) []byte {
+	var payload []byte
+	var err error
+
+	switch mockConfig.Response.Body.(type) {
+	case string: //Working json with string
+		var jsonData interface{}
+
+		err = json.Unmarshal([]byte(mockConfig.Response.Body.(string)), &jsonData)
+		if err != nil {
+			return []byte(mockConfig.Response.Body.(string))
+		}
+
+		payload, err = json.MarshalIndent(jsonData, "", "\t")
+		if err != nil {
+			return []byte(mockConfig.Response.Body.(string))
+		}
+
+	default: //Working json with object
+		payload, err = json.Marshal(mockConfig.Response.Body)
+
+		if err != nil {
+			return []byte(mockConfig.Response.Body.(string))
+		}
+
+	}
+
+	return payload
+}
+
+func processMockDelay(mockConfig domain.MockConfiguration) {
+	delay := mockConfig.Response.Configuration.ResponseDelay
 
 	if delay <= 0 || delay >= 20000 {
 		delay = 50
 	}
 
-	return statusCode, headers, body, delay
-}
-
-func processMockPayload(body interface{}) ([]byte, error) {
-	var payload []byte
-	var err error
-
-	switch body.(type) {
-	case string:
-		var jsonData interface{}
-
-		err = json.Unmarshal([]byte(body.(string)), &jsonData)
-		if err != nil {
-			return nil, err
-		}
-
-		payload, err = json.MarshalIndent(jsonData, "", "\t")
-		if err != nil {
-			return nil, err
-		}
-
-	default:
-		payload, err = json.Marshal(body)
-
-		if err != nil {
-			return nil, err
-		}
-
-	}
-
-	return payload, nil
+	time.Sleep(time.Duration(delay) * time.Millisecond)
 }
