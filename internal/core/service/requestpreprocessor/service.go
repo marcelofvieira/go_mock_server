@@ -72,7 +72,12 @@ func processQueryParameter(mockConfig *domain.MockConfiguration) {
 
 				processVariable(mockConfig, variable[1], variable[0], QueryVariable)
 			}
-			mockConfig.Request.Regex.URL = queryValue
+
+			mockConfig.Request.Regex.QueryParameters = append(mockConfig.Request.Regex.QueryParameters,
+				domain.QueryParameter{
+					Key:   query.Key,
+					Value: queryValue,
+				})
 		}
 	}
 }
