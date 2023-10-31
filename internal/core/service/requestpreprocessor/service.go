@@ -3,6 +3,8 @@ package requestpreprocessor
 import (
 	"context"
 	"mock_server_mux/internal/core/domain"
+	"mock_server_mux/pkg/interfaceutils"
+	"mock_server_mux/pkg/regexutil"
 	"strings"
 )
 
@@ -12,79 +14,65 @@ func NewService() *Service {
 	return &Service{}
 }
 
+const (
+	PathVariable   = "path"
+	QueryVariable  = "query"
+	HeaderVariable = "header"
+	BodyVariable   = "body"
+)
+
 func (s *Service) ProcessMockParameters(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
 
-	// interfaceutils.GetToString(mockConfig.Request.Body)
+	processUrlConfiguration(&mockConfig)
 
-	mockConfig, err := processUrlConfiguration(mockConfig)
-	if err != nil {
-		return domain.MockConfiguration{}, err
-	}
+	processQueryParameter(&mockConfig)
 
 	return mockConfig, nil
 }
 
-func processUrlConfiguration(mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
+func processVariable(mockConfig *domain.MockConfiguration, variable, value, context string) {
+	mockConfig.Request.Variables = append(mockConfig.Request.Variables,
+		domain.Variable{
+			Name:      "${" + context + "." + variable + "}",
+			ValueFrom: value,
+		})
+}
 
-	variables := make([]domain.Variable, 0)
-
+func processUrlConfiguration(mockConfig *domain.MockConfiguration) {
 	URL := mockConfig.Request.URL
 
-	initPos := -1
-
-	for index, char := range URL {
-		if char == '{' {
-			initPos = index + 1
-		}
-
-		if char == '}' {
-			variables = append(variables, domain.Variable{
-				Name:    URL[initPos:index],
-				Context: "path",
-			})
-			initPos = -1
-		}
+	found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, mockConfig.Request.URL)
+	if !found {
+		return
 	}
-
-	mockConfig.Request.Variables = variables
 
 	if len(variables) > 0 {
 		for _, variable := range variables {
-			find := "{" + variable.Name + "}"
-			URL = strings.Replace(URL, find, "([^/]+)", 1)
+			URL = strings.Replace(URL, variable[0], regexutil.FindVariableValuePattern, 1)
+
+			processVariable(mockConfig, variable[1], variable[0], PathVariable)
 		}
-
-		mockConfig.Request.RegexURL = URL + "+$"
-
+		mockConfig.Request.Regex.URL = URL + regexutil.FindToFinalPattern
 	}
-
-	return mockConfig, nil
 }
 
-func processQueryParamConfig(mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
+func processQueryParameter(mockConfig *domain.MockConfiguration) {
+	for _, query := range mockConfig.Request.QueryParameters {
 
-	variables := make([]domain.Variable, 0)
+		queryValue, _ := interfaceutils.GetToString(query.Value)
 
-	URL := mockConfig.Request.URL
-
-	initPos := -1
-
-	for index, char := range URL {
-		if char == '{' {
-			initPos = index + 1
+		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, queryValue)
+		if !found {
+			return
 		}
 
-		if char == '}' {
-			variables = append(variables, domain.Variable{
-				Name:    URL[initPos:index],
-				Context: "path",
-			})
+		if len(variables) > 0 {
+			for _, variable := range variables {
+				queryValue = strings.Replace(queryValue, variable[0], regexutil.FindVariableValuePattern, 1)
 
-			initPos = -1
+				processVariable(mockConfig, variable[1], variable[0], QueryVariable)
+			}
+			mockConfig.Request.Regex.URL = queryValue
 		}
 	}
-
-	mockConfig.Request.Variables = variables
-
-	return mockConfig, nil
 }

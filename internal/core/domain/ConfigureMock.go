@@ -3,9 +3,8 @@ package domain
 type MockType int
 
 type Variable struct {
-	Name    string `json:"name,omitempty"`
-	Type    string `json:"type,omitempty"`
-	Context string `json:"context,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ValueFrom string `json:"value_from,omitempty"`
 }
 
 type MockConfiguration struct {
@@ -23,12 +22,19 @@ type Info struct {
 type RequestMock struct {
 	Method          string               `json:"method"`
 	URL             string               `json:"url"`
-	RegexURL        string               `json:"regex_url"`
+	Regex           Regex                `json:"regex"`
 	Headers         []Header             `json:"headers"`
 	QueryParameters []QueryParameter     `json:"query_parameters"`
 	Body            interface{}          `json:"body"`
 	Variables       []Variable           `json:"variables"`
 	Configuration   RequestConfiguration `json:"configuration"`
+}
+
+type Regex struct {
+	URL             string           `json:"url,omitempty"`
+	Headers         []Header         `json:"headers,omitempty"`
+	QueryParameters []QueryParameter `json:"query_parameters,omitempty"`
+	Body            interface{}      `json:"body,omitempty"`
 }
 
 type Header struct {
@@ -37,8 +43,8 @@ type Header struct {
 }
 
 type QueryParameter struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
 }
 
 type RequestConfiguration struct {

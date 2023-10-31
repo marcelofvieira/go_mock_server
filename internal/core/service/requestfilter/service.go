@@ -6,7 +6,9 @@ import (
 	"io"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/apperrors"
+	"mock_server_mux/pkg/interfaceutils"
 	"mock_server_mux/pkg/logger"
+	"mock_server_mux/pkg/regexutil"
 	"mock_server_mux/pkg/stringutils"
 	"net/http"
 )
@@ -67,7 +69,7 @@ func filterByMethodAndPath(request *http.Request, configuration domain.MockConfi
 	pattern := configuration.Request.Method + " " + configuration.Request.URL
 	findString := method + " " + path
 
-	if stringutils.FindStringRegex(pattern, findString) {
+	if regexutil.FindStringRegex(pattern, findString) {
 		return configuration, true
 	}
 
@@ -84,8 +86,10 @@ func filterByQueryParam(request *http.Request, configuration domain.MockConfigur
 
 		queryParamValue := request.URL.Query().Get(queryParam.Key)
 
+		mockQueryParam, _ := interfaceutils.GetToString(queryParam.Value)
+
 		if queryParamValue != queryParam.Value {
-			if !stringutils.FindStringRegex(queryParam.Value, queryParamValue) {
+			if !regexutil.FindStringRegex(mockQueryParam, queryParamValue) {
 				return domain.MockConfiguration{}, false
 			}
 		}
@@ -106,7 +110,7 @@ func filterByHeader(request *http.Request, configuration domain.MockConfiguratio
 
 		if headerValue != header.Value {
 
-			if !stringutils.FindStringRegex(header.Value, headerValue) {
+			if !regexutil.FindStringRegex(header.Value, headerValue) {
 				return domain.MockConfiguration{}, false
 			}
 		}
@@ -134,7 +138,7 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 	mockBody := prepareBody(string(jsonBytes))
 
 	if requestBody != mockBody {
-		if !stringutils.FindStringRegex(mockBody, requestBody) {
+		if !regexutil.FindStringRegex(mockBody, requestBody) {
 			return domain.MockConfiguration{}, false
 		}
 	}
