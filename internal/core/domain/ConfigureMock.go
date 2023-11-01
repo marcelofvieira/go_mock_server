@@ -3,15 +3,16 @@ package domain
 type MockType int
 
 type Variable struct {
-	Name      string `json:"name,omitempty"`
-	ValueFrom string `json:"value_from,omitempty"`
+	Name  string      `json:"name,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }
 
 type MockConfiguration struct {
-	Id       int          `json:"id"`
-	Info     Info         `json:"info"`
-	Request  RequestMock  `json:"request"`
-	Response ResponseMock `json:"response"`
+	Id        int                   `json:"id"`
+	Info      Info                  `json:"info"`
+	Request   RequestMock           `json:"request"`
+	Response  ResponseMock          `json:"response"`
+	Variables map[string][]Variable `json:"variables"`
 }
 
 type Info struct {
@@ -26,14 +27,13 @@ type RequestMock struct {
 	Headers         []Header             `json:"headers"`
 	QueryParameters []QueryParameter     `json:"query_parameters"`
 	Body            interface{}          `json:"body"`
-	Variables       []Variable           `json:"variables"`
 	Configuration   RequestConfiguration `json:"configuration"`
 }
 
 type Regex struct {
 	URL             string           `json:"url,omitempty"`
 	Headers         []Header         `json:"headers,omitempty"`
-	QueryParameters []QueryParameter `json:"query_parameters,omitempty"`
+	QueryParameters []QueryParameter `json:"query_parameters"`
 	Body            interface{}      `json:"body,omitempty"`
 }
 

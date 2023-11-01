@@ -3,15 +3,16 @@ package presenter
 type MockType int
 
 type Variable struct {
-	Name      string `json:"name,omitempty"`
-	ValueFrom string `json:"value_from,omitempty"`
+	Name  string      `json:"name,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }
 
 type MockConfiguration struct {
-	Id       int          `json:"id,omitempty"`
-	Info     Info         `json:"info,omitempty"`
-	Request  RequestMock  `json:"request,omitempty"`
-	Response ResponseMock `json:"response,omitempty"`
+	Id        int                   `json:"id,omitempty"`
+	Info      Info                  `json:"info,omitempty"`
+	Request   RequestMock           `json:"request,omitempty"`
+	Response  ResponseMock          `json:"response,omitempty"`
+	Variables map[string][]Variable `json:"variables,omitempty"`
 }
 
 type Info struct {
@@ -25,7 +26,6 @@ type RequestMock struct {
 	Headers         []Header             `json:"headers,omitempty"`
 	QueryParameters []QueryParameter     `json:"query_parameters,omitempty"`
 	Body            interface{}          `json:"body,omitempty"`
-	Variables       []Variable           `json:"variables,omitempty"`
 	Configuration   RequestConfiguration `json:"configuration,omitempty"`
 	Regex           Regex                `json:"regex,omitempty"`
 }
@@ -57,6 +57,7 @@ type ResponseMock struct {
 	Headers       []Header              `json:"headers,omitempty"`
 	Body          interface{}           `json:"body,omitempty"`
 	Configuration ResponseConfiguration `json:"configuration,omitempty"`
+	Variables     []Variable            `json:"variables,omitempty"`
 }
 
 type ResponseConfiguration struct {
