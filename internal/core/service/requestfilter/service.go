@@ -66,7 +66,8 @@ func filterByMethodAndPath(request *http.Request, configuration domain.MockConfi
 		return configuration, true
 	}
 
-	pattern := configuration.Request.Method + " " + configuration.Request.URL
+	pattern := configuration.Request.Method + " " + configuration.Request.Regex.URL
+
 	findString := method + " " + path
 
 	if regexutil.FindStringRegex(pattern, findString) {
@@ -89,6 +90,7 @@ func filterByQueryParam(request *http.Request, configuration domain.MockConfigur
 		mockQueryParam, _ := interfaceutils.GetToString(queryParam.Value)
 
 		if queryParamValue != queryParam.Value {
+
 			if !regexutil.FindStringRegex(mockQueryParam, queryParamValue) {
 				return domain.MockConfiguration{}, false
 			}

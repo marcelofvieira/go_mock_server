@@ -9,6 +9,7 @@ import (
 	"mock_server_mux/internal/core/service/mockconfiguration"
 	"mock_server_mux/internal/core/service/requestfilter"
 	"mock_server_mux/internal/core/service/requestpreprocessor"
+	"mock_server_mux/internal/core/service/responseprocessor"
 	"mock_server_mux/internal/repository/mockconfigurationrepo"
 	_ "mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/logger"
@@ -26,6 +27,7 @@ func main() {
 
 func Run() error {
 
+	//TODO: Define best place for router
 	router := mux.NewRouter()
 
 	// ----------------------------------------------------------------------------------------------------------------
@@ -33,8 +35,8 @@ func Run() error {
 	// ----------------------------------------------------------------------------------------------------------------
 	mockConfigRepository := mockconfigurationrepo.NewMemKVS()
 	mockRequestPreProcessorService := requestpreprocessor.NewService()
-
 	configMockService := mockconfiguration.NewService(mockConfigRepository, mockRequestPreProcessorService)
+
 	mockConfigHandler := mockconfighandler.NewHTTPHandler(configMockService)
 
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")
@@ -46,13 +48,15 @@ func Run() error {
 	// Dynamic Handler
 	// ----------------------------------------------------------------------------------------------------------------
 	filterHandlerService := requestfilter.NewService()
-	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService)
+	responseProcessorService := responseprocessor.NewService()
+	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService, responseProcessorService)
+
 	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
 
 	router.NotFoundHandler = http.HandlerFunc(dynamicHandler.ProcessDynamicHandler)
 
 	// ----------------------------------------------------------------------------------------------------------------
-	// Dynamic Handler
+	// Init server
 	// ----------------------------------------------------------------------------------------------------------------
 	http.Handle("/", router)
 
