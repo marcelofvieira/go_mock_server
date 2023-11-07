@@ -7,6 +7,7 @@ import (
 	"mock_server_mux/api/handlers/mockconfighandler"
 	"mock_server_mux/internal/core/service/dynamichandlerprocessor"
 	"mock_server_mux/internal/core/service/mockconfiguration"
+	"mock_server_mux/internal/core/service/mockprocessor"
 	"mock_server_mux/internal/core/service/requestfilter"
 	"mock_server_mux/internal/core/service/requestpreprocessor"
 	"mock_server_mux/internal/core/service/responseprocessor"
@@ -49,7 +50,8 @@ func Run() error {
 	// ----------------------------------------------------------------------------------------------------------------
 	filterHandlerService := requestfilter.NewService()
 	responseProcessorService := responseprocessor.NewService()
-	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService, responseProcessorService)
+	mockProcessorService := mockprocessor.NewService()
+	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService, mockProcessorService, responseProcessorService)
 
 	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
 

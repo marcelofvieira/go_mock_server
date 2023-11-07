@@ -11,13 +11,19 @@ import (
 type Service struct {
 	mockRepository       ports.MockConfigurationRepository
 	requestFilterService ports.RequestFilterService
+	mockProcessorService ports.MockProcessorService
 	processMockResponse  ports.MockResponseProcessor
 }
 
-func NewService(mockRepository ports.MockConfigurationRepository, requestFilterService ports.RequestFilterService, processMockResponse ports.MockResponseProcessor) *Service {
+func NewService(mockRepository ports.MockConfigurationRepository,
+	requestFilterService ports.RequestFilterService,
+	mockProcessorService ports.MockProcessorService,
+	processMockResponse ports.MockResponseProcessor) *Service {
+
 	return &Service{
 		mockRepository:       mockRepository,
 		requestFilterService: requestFilterService,
+		mockProcessorService: mockProcessorService,
 		processMockResponse:  processMockResponse,
 	}
 }
@@ -39,6 +45,11 @@ func (s *Service) ProcessDynamicHandler(ctx context.Context, request *http.Reque
 		} else {
 			return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "internal server error")
 		}
+	}
+
+	mockConfig, err = s.mockProcessorService.ProcessMock(ctx, mockConfig)
+	if err != nil {
+		return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "internal server error")
 	}
 
 	mockConfig, err = s.processMockResponse.ProcessMockResponse(ctx, mockConfig)
