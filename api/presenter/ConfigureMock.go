@@ -1,18 +1,12 @@
 package presenter
 
-type MockType int
-
-type Variable struct {
-	Name  string      `json:"name,omitempty"`
-	Value interface{} `json:"value,omitempty"`
-}
-
 type MockConfiguration struct {
-	Id        int                   `json:"id,omitempty"`
-	Info      Info                  `json:"info,omitempty"`
-	Request   RequestMock           `json:"request,omitempty"`
-	Response  ResponseMock          `json:"response,omitempty"`
-	Variables map[string][]Variable `json:"variables,omitempty"`
+	Id            int                               `json:"id,omitempty"`
+	Info          Info                              `json:"info,omitempty"`
+	Request       RequestMock                       `json:"request,omitempty"`
+	Response      ResponseMock                      `json:"response,omitempty"`
+	MockVariables map[string]map[string]interface{} `json:"mock_variables,omitempty"`
+	UserVariables map[string]interface{}            `json:"variables,omitempty"`
 }
 
 type Info struct {
@@ -21,45 +15,25 @@ type Info struct {
 }
 
 type RequestMock struct {
-	Method          string               `json:"method,omitempty"`
-	URL             string               `json:"url,omitempty"`
-	Headers         []Header             `json:"headers,omitempty"`
-	QueryParameters []QueryParameter     `json:"query_parameters,omitempty"`
-	Body            interface{}          `json:"body,omitempty"`
-	Configuration   RequestConfiguration `json:"configuration,omitempty"`
-	Regex           Regex                `json:"regex,omitempty"`
+	Method          string                 `json:"method,omitempty"`
+	URL             string                 `json:"url,omitempty"`
+	Regex           Regex                  `json:"regex,omitempty"`
+	Headers         map[string]interface{} `json:"headers,omitempty"`
+	QueryParameters map[string]interface{} `json:"query_parameters,omitempty"`
+	Body            interface{}            `json:"body,omitempty"`
+	Configuration   map[string]interface{} `json:"configuration,omitempty"`
 }
 
 type Regex struct {
-	URL             string           `json:"url,omitempty"`
-	Headers         []Header         `json:"headers,omitempty"`
-	QueryParameters []QueryParameter `json:"query_parameters,omitempty"`
-	Body            interface{}      `json:"body,omitempty"`
-}
-
-type Header struct {
-	Key   string `json:"key,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
-type QueryParameter struct {
-	Key   string      `json:"key,omitempty"`
-	Value interface{} `json:"value,omitempty"`
-}
-
-type RequestConfiguration struct {
-	Forward    bool   `json:"forward,omitempty"`
-	ForwardUrl string `json:"forward_url,omitempty"`
+	URL             string            `json:"url,omitempty"`
+	Headers         map[string]string `json:"headers,omitempty"`
+	QueryParameters map[string]string `json:"query_parameters"`
+	Body            interface{}       `json:"body,omitempty"`
 }
 
 type ResponseMock struct {
-	StatusCode    int                   `json:"status,omitempty"`
-	Headers       []Header              `json:"headers,omitempty"`
-	Body          interface{}           `json:"body,omitempty"`
-	Configuration ResponseConfiguration `json:"configuration,omitempty"`
-	Variables     []Variable            `json:"variables,omitempty"`
-}
-
-type ResponseConfiguration struct {
-	ResponseDelay int `json:"response_delay,omitempty"`
+	StatusCode    int                    `json:"status,omitempty"`
+	Headers       map[string]interface{} `json:"headers,omitempty"`
+	Body          interface{}            `json:"body,omitempty"`
+	Configuration map[string]interface{} `json:"configuration,omitempty"`
 }
