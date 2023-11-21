@@ -19,6 +19,7 @@ const (
 	QueryVariable  = "query"
 	HeaderVariable = "header"
 	BodyVariable   = "body"
+	UserVariable   = "var"
 )
 
 func (s *Service) ProcessMockParameters(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
@@ -38,7 +39,7 @@ func (s *Service) ProcessMockParameters(ctx context.Context, mockConfig domain.M
 	return mockConfig, nil
 }
 
-func processVariable(mockConfig *domain.MockConfiguration, variable string, value interface{}, context string) {
+func addVariableControl(mockConfig *domain.MockConfiguration, variable string, value interface{}, context string) {
 	if mockConfig.MockVariables == nil {
 		mockConfig.MockVariables = make(map[string]map[string]interface{})
 	}
@@ -51,8 +52,10 @@ func processVariable(mockConfig *domain.MockConfiguration, variable string, valu
 }
 
 func processUserVariables(mockConfig *domain.MockConfiguration) {
-	for key, value := range mockConfig.UserVariables {
-		processVariable(mockConfig, key, value, "var")
+	for contextKey, userVariables := range mockConfig.UserVariables {
+		for key, value := range userVariables {
+			addVariableControl(mockConfig, key, value, contextKey)
+		}
 	}
 }
 
@@ -63,7 +66,7 @@ func processMockVariables(mockConfig *domain.MockConfiguration) {
 
 	for contextKey, contextVariables := range mockVariables {
 		for key, value := range contextVariables {
-			processVariable(mockConfig, key, value, contextKey)
+			addVariableControl(mockConfig, key, value, contextKey)
 		}
 	}
 }
@@ -80,7 +83,7 @@ func processUrlVariables(mockConfig *domain.MockConfiguration) {
 		for _, variable := range variables {
 			URL = strings.Replace(URL, variable[0], regexutil.FindVariableValuePattern, 1)
 
-			processVariable(mockConfig, variable[1], variable[0], PathVariable)
+			addVariableControl(mockConfig, variable[1], variable[0], PathVariable)
 		}
 
 		mockConfig.Request.Regex.URL = URL + regexutil.FindToFinalPattern
@@ -89,11 +92,11 @@ func processUrlVariables(mockConfig *domain.MockConfiguration) {
 
 func processQueryVariables(mockConfig *domain.MockConfiguration) {
 
-	for key, value := range mockConfig.Request.QueryParameters {
+	for parameterName, parameterValue := range mockConfig.Request.QueryParameters {
 
-		valueStr, _ := interfaceutils.GetToString(value)
+		value, _ := interfaceutils.GetToString(parameterValue)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, valueStr)
+		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, value)
 		if !found {
 			continue
 		}
@@ -102,23 +105,23 @@ func processQueryVariables(mockConfig *domain.MockConfiguration) {
 			mockConfig.Request.Regex.QueryParameters = make(map[string]string)
 
 			for _, variable := range variables {
-				value = strings.Replace(valueStr, variable[0], regexutil.FindVariableValuePattern, 1)
+				parameterValue = strings.Replace(value, variable[0], regexutil.FindVariableValuePattern, 1)
 
-				processVariable(mockConfig, variable[1], variable[0], QueryVariable)
+				addVariableControl(mockConfig, variable[1], variable[0], QueryVariable)
 			}
 
-			mockConfig.Request.Regex.QueryParameters[key] = valueStr
+			mockConfig.Request.Regex.QueryParameters[parameterName] = value + regexutil.FindToFinalPattern
 		}
 	}
 }
 
 func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
-	for key, value := range mockConfig.Request.Headers {
+	for headerName, headerValue := range mockConfig.Request.Headers {
 
-		valueStr, _ := interfaceutils.GetToString(value)
+		value, _ := interfaceutils.GetToString(headerValue)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, valueStr)
+		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, value)
 		if !found {
 			continue
 		}
@@ -127,12 +130,12 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 			mockConfig.Request.Regex.Headers = make(map[string]string)
 
 			for _, variable := range variables {
-				valueStr = strings.Replace(valueStr, variable[0], regexutil.FindVariableValuePattern, 1)
+				value = strings.Replace(value, variable[0], regexutil.FindVariableValuePattern, 1)
 
-				processVariable(mockConfig, variable[1], variable[0], HeaderVariable)
+				addVariableControl(mockConfig, variable[1], variable[0], HeaderVariable)
 			}
 
-			mockConfig.Request.Regex.Headers[key] = valueStr
+			mockConfig.Request.Regex.Headers[headerName] = value + regexutil.FindToFinalPattern
 		}
 	}
 }
@@ -150,7 +153,7 @@ func processBodyVariables(mockConfig *domain.MockConfiguration) {
 		for _, variable := range variables {
 			body = strings.Replace(body, variable[0], regexutil.FindVariableValuePattern, 1)
 
-			processVariable(mockConfig, variable[1], variable[0], BodyVariable)
+			addVariableControl(mockConfig, variable[1], variable[0], BodyVariable)
 		}
 
 		mockConfig.Request.Regex.Body = body + regexutil.FindToFinalPattern

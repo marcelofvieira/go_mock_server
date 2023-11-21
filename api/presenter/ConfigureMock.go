@@ -6,7 +6,7 @@ type MockConfiguration struct {
 	Request       RequestMock                       `json:"request,omitempty"`
 	Response      ResponseMock                      `json:"response,omitempty"`
 	MockVariables map[string]map[string]interface{} `json:"mock_variables,omitempty"`
-	UserVariables map[string]interface{}            `json:"variables,omitempty"`
+	UserVariables map[string]map[string]interface{} `json:"variables,omitempty"`
 }
 
 type Info struct {

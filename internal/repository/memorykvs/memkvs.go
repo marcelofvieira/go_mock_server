@@ -1,4 +1,4 @@
-package mockconfigurationrepo
+package memorykvs
 
 import (
 	"context"

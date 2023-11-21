@@ -11,7 +11,7 @@ import (
 	"mock_server_mux/internal/core/service/requestfilter"
 	"mock_server_mux/internal/core/service/requestpreprocessor"
 	"mock_server_mux/internal/core/service/responseprocessor"
-	"mock_server_mux/internal/repository/mockconfigurationrepo"
+	"mock_server_mux/internal/repository/memorykvs"
 	_ "mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/logger"
 	"net/http"
@@ -27,14 +27,13 @@ func main() {
 }
 
 func Run() error {
-
 	//TODO: Define best place for router
 	router := mux.NewRouter()
 
 	// ----------------------------------------------------------------------------------------------------------------
 	// Mock Configuration Handler
 	// ----------------------------------------------------------------------------------------------------------------
-	mockConfigRepository := mockconfigurationrepo.NewMemKVS()
+	mockConfigRepository := memorykvs.NewMemKVS()
 	mockRequestPreProcessorService := requestpreprocessor.NewService()
 	configMockService := mockconfiguration.NewService(mockConfigRepository, mockRequestPreProcessorService)
 
