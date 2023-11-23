@@ -31,7 +31,7 @@ func (s *Service) GetVariablesValues(ctx context.Context, request *http.Request,
 
 	getHeaderVariablesValues(request, &mockConfig)
 
-	getBodyVariablesValues(request, &mockConfig)
+	getBodyVariablesValues(&mockConfig)
 
 	return mockConfig, nil
 
@@ -116,7 +116,7 @@ func getHeaderVariablesValues(request *http.Request, mockConfig *domain.MockConf
 	}
 }
 
-func getBodyVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration) {
+func getBodyVariablesValues(mockConfig *domain.MockConfiguration) {
 
 	if len(mockConfig.MockVariables[BodyVariable]) == 0 {
 		return
