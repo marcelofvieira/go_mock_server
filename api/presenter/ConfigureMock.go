@@ -27,7 +27,7 @@ type RequestMock struct {
 type Regex struct {
 	URL             string            `json:"url,omitempty"`
 	Headers         map[string]string `json:"headers,omitempty"`
-	QueryParameters map[string]string `json:"query_parameters"`
+	QueryParameters map[string]string `json:"query_parameters,omitempty"`
 	Body            interface{}       `json:"body,omitempty"`
 }
 

@@ -142,6 +142,8 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 
 	requestBody := prepareBody(string(body))
 
+	configuration.Request.PreparedBody = requestBody
+
 	jsonBytes, err := json.Marshal(configuration.Request.Body)
 	if err != nil {
 		logger.Error("Error encoding to JSON", err)
@@ -151,6 +153,9 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 	mockBody := prepareBody(string(jsonBytes))
 
 	if requestBody != mockBody {
+
+		mockBody, _ = configuration.Request.Regex.Body.(string)
+
 		if !regexutil.FindStringRegex(mockBody, requestBody) {
 			return domain.MockConfiguration{}, false
 		}

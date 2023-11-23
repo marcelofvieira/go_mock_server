@@ -19,7 +19,6 @@ const (
 	QueryVariable  = "query"
 	HeaderVariable = "header"
 	BodyVariable   = "body"
-	UserVariable   = "var"
 )
 
 func (s *Service) ProcessMockParameters(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
@@ -94,7 +93,7 @@ func processQueryVariables(mockConfig *domain.MockConfiguration) {
 
 	for parameterName, parameterValue := range mockConfig.Request.QueryParameters {
 
-		value, _ := interfaceutils.GetToString(parameterValue)
+		value, _ := parameterValue.(string)
 
 		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, value)
 		if !found {
@@ -105,7 +104,7 @@ func processQueryVariables(mockConfig *domain.MockConfiguration) {
 			mockConfig.Request.Regex.QueryParameters = make(map[string]string)
 
 			for _, variable := range variables {
-				parameterValue = strings.Replace(value, variable[0], regexutil.FindVariableValuePattern, 1)
+				value = strings.Replace(value, variable[0], regexutil.FindVariableValuePattern, 1)
 
 				addVariableControl(mockConfig, variable[1], variable[0], QueryVariable)
 			}
@@ -119,7 +118,7 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
 	for headerName, headerValue := range mockConfig.Request.Headers {
 
-		value, _ := interfaceutils.GetToString(headerValue)
+		value, _ := headerValue.(string)
 
 		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, value)
 		if !found {

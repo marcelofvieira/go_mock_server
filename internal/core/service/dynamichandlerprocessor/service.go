@@ -47,7 +47,7 @@ func (s *Service) ProcessDynamicHandler(ctx context.Context, request *http.Reque
 		}
 	}
 
-	mockConfig, err = s.mockProcessorService.ProcessMock(ctx, mockConfig)
+	mockConfig, err = s.mockProcessorService.GetVariablesValues(ctx, request, mockConfig)
 	if err != nil {
 		return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "internal server error")
 	}

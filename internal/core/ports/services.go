@@ -26,7 +26,7 @@ type RequestFilterService interface {
 }
 
 type MockProcessorService interface {
-	ProcessMock(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
+	GetVariablesValues(context.Context, *http.Request, domain.MockConfiguration) (domain.MockConfiguration, error)
 }
 
 type MockResponseProcessor interface {
