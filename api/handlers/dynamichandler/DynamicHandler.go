@@ -5,7 +5,6 @@ import (
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
-	"mock_server_mux/pkg/interfaceutils"
 	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/response"
 	"net/http"
@@ -81,7 +80,7 @@ func processMockHeaders(mockConfig domain.MockConfiguration) map[string]string {
 	headers := make(map[string]string)
 
 	for key, value := range mockConfig.Response.Headers {
-		headers[key], _ = interfaceutils.GetToString(value)
+		headers[key], _ = value.(string)
 	}
 
 	return headers
@@ -118,14 +117,14 @@ func processMockPayload(mockConfig domain.MockConfiguration) []byte {
 }
 
 func processMockDelay(mockConfig domain.MockConfiguration) {
-	delayConfig, _ := interfaceutils.GetToString(mockConfig.Response.Configuration[domain.ConfigResponseDelay])
+	delayConfig, _ := mockConfig.Response.Configuration[domain.ConfigResponseDelay].(string)
 
 	delay, err := strconv.Atoi(delayConfig)
 	if err != nil {
 		delay = 2
 	}
 
-	if delay <= 0 || delay >= 20000 {
+	if delay <= 0 || delay >= 30000 {
 		delay = 50
 	}
 

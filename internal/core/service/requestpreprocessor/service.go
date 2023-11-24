@@ -23,7 +23,8 @@ const (
 
 func (s *Service) ProcessMockParameters(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
 
-	processMockVariables(&mockConfig)
+	//Deprecated
+	//processMockVariables(&mockConfig)
 
 	processUserVariables(&mockConfig)
 
@@ -51,6 +52,7 @@ func addVariableControl(mockConfig *domain.MockConfiguration, variable string, v
 }
 
 func processUserVariables(mockConfig *domain.MockConfiguration) {
+
 	for contextKey, userVariables := range mockConfig.UserVariables {
 		for key, value := range userVariables {
 			addVariableControl(mockConfig, key, value, contextKey)
@@ -58,6 +60,7 @@ func processUserVariables(mockConfig *domain.MockConfiguration) {
 	}
 }
 
+/*
 func processMockVariables(mockConfig *domain.MockConfiguration) {
 	mockVariables := mockConfig.MockVariables
 
@@ -69,8 +72,10 @@ func processMockVariables(mockConfig *domain.MockConfiguration) {
 		}
 	}
 }
+*/
 
 func processUrlVariables(mockConfig *domain.MockConfiguration) {
+
 	URL := mockConfig.Request.URL
 
 	found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, URL)
@@ -141,6 +146,7 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
 func processBodyVariables(mockConfig *domain.MockConfiguration) {
 
+	//TODO: revisar .(string)
 	body, _ := interfaceutils.GetToString(mockConfig.Request.Body)
 
 	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, body)

@@ -8,6 +8,7 @@ import (
 	"mock_server_mux/pkg/regexutil"
 	"mock_server_mux/pkg/stringutils"
 	"net/http"
+	"sync"
 )
 
 const (
@@ -25,19 +26,28 @@ func NewService() *Service {
 
 func (s *Service) GetVariablesValues(ctx context.Context, request *http.Request, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
 
-	getURLVariablesValues(request, &mockConfig)
+	//TODO: Revisar remover goroutines
+	var wg sync.WaitGroup
 
-	getQueryParamVariablesValues(request, &mockConfig)
+	wg.Add(4)
 
-	getHeaderVariablesValues(request, &mockConfig)
+	go getURLVariablesValues(request, &mockConfig, &wg)
 
-	getBodyVariablesValues(&mockConfig)
+	go getQueryParamVariablesValues(request, &mockConfig, &wg)
+
+	go getHeaderVariablesValues(request, &mockConfig, &wg)
+
+	go getBodyVariablesValues(&mockConfig, &wg)
+
+	wg.Wait()
 
 	return mockConfig, nil
 
 }
 
-func getURLVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration) {
+func getURLVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	if len(mockConfig.MockVariables[PathVariable]) == 0 {
 		return
@@ -62,7 +72,9 @@ func getURLVariablesValues(request *http.Request, mockConfig *domain.MockConfigu
 
 }
 
-func getQueryParamVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration) {
+func getQueryParamVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	if len(mockConfig.MockVariables[QueryVariable]) == 0 {
 		return
@@ -89,7 +101,9 @@ func getQueryParamVariablesValues(request *http.Request, mockConfig *domain.Mock
 	}
 }
 
-func getHeaderVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration) {
+func getHeaderVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	if len(mockConfig.MockVariables[HeaderVariable]) == 0 {
 		return
@@ -116,7 +130,9 @@ func getHeaderVariablesValues(request *http.Request, mockConfig *domain.MockConf
 	}
 }
 
-func getBodyVariablesValues(mockConfig *domain.MockConfiguration) {
+func getBodyVariablesValues(mockConfig *domain.MockConfiguration, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	if len(mockConfig.MockVariables[BodyVariable]) == 0 {
 		return

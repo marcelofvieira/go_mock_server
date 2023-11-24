@@ -3,10 +3,12 @@ package regexutil
 import "regexp"
 
 const (
-	FindVariablePattern      = "\\{{(.+?)\\}}"
-	FindBodyVariablePattern  = "\\{{(.+?)\\}}"
-	FindVariableValuePattern = "([^/]+)"
-	FindToFinalPattern       = "+$"
+	FindResponseVariablePattern = "\\${(.+?)}"
+	FindVariableContextPattern  = "\\${([a-zA-Z0-9]+)\\."
+	FindVariablePattern         = "\\{{(.+?)\\}}"
+	FindBodyVariablePattern     = "\\{{(.+?)\\}}"
+	FindVariableValuePattern    = "([^/]+)"
+	FindToFinalPattern          = "+$"
 )
 
 func FindStringRegex(pattern, text string) bool {
