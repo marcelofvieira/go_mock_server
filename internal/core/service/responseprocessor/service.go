@@ -89,10 +89,12 @@ func (s *Service) processPayload(mockConfig *domain.MockConfiguration) error {
 			continue
 		}
 
-		if variableValue, ok := mockConfig.MockVariables[variableContext[0][1]][variable[0]].(string); ok {
-			body = strings.Replace(body, variable[0], variableValue, 1)
+		variableName, replaceContent := analyseVariable(variable[0])
+
+		if variableValue, ok := mockConfig.MockVariables[variableContext[0][1]][variableName].(string); ok {
+			body = strings.Replace(body, replaceContent, variableValue, 1)
 		} else {
-			body = strings.Replace(body, variable[0], "", 1)
+			body = strings.Replace(body, replaceContent, "", 1)
 		}
 
 	}
@@ -100,4 +102,27 @@ func (s *Service) processPayload(mockConfig *domain.MockConfiguration) error {
 	mockConfig.Response.Body = body
 
 	return nil
+}
+
+func analyseVariable(variable string) (string, string) {
+
+	var variableName, replaceContent string
+
+	variableName = variable
+	replaceContent = variable
+
+	found, _ := regexutil.FindStringValuesRegex(regexutil.FindNumberBooleanVariablePattern, variable)
+	if !found {
+		return variableName, replaceContent
+	}
+
+	found, variableInfo := regexutil.FindStringValuesRegex(regexutil.FindResponseVariablePattern, variable)
+	if !found {
+		return variableName, replaceContent
+	}
+
+	variableName = "${" + variableInfo[0][1] + "}"
+	replaceContent = "\"" + variable + "\""
+
+	return variableName, replaceContent
 }
