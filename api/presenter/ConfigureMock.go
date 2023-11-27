@@ -17,18 +17,10 @@ type Info struct {
 type RequestMock struct {
 	Method          string                 `json:"method,omitempty"`
 	URL             string                 `json:"url,omitempty"`
-	Regex           Regex                  `json:"regex,omitempty"`
 	Headers         map[string]interface{} `json:"headers,omitempty"`
 	QueryParameters map[string]interface{} `json:"query_parameters,omitempty"`
 	Body            interface{}            `json:"body,omitempty"`
 	Configuration   map[string]interface{} `json:"configuration,omitempty"`
-}
-
-type Regex struct {
-	URL             string            `json:"url,omitempty"`
-	Headers         map[string]string `json:"headers,omitempty"`
-	QueryParameters map[string]string `json:"query_parameters,omitempty"`
-	Body            interface{}       `json:"body,omitempty"`
 }
 
 type ResponseMock struct {

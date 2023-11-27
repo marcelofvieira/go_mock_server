@@ -146,7 +146,6 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
 func processBodyVariables(mockConfig *domain.MockConfiguration) {
 
-	//TODO: revisar .(string)
 	body, _ := interfaceutils.GetToString(mockConfig.Request.Body)
 
 	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, body)

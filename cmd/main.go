@@ -41,7 +41,7 @@ func Run() error {
 
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")
 	router.HandleFunc("/mock-config", mockConfigHandler.AddMockConfiguration).Methods("POST")
-	router.HandleFunc("/mock-config", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
+	router.HandleFunc("/mock-config/{id}", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.DeleteMockConfiguration).Methods("DELETE")
 
 	// ----------------------------------------------------------------------------------------------------------------

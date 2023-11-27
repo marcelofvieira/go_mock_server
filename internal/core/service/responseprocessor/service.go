@@ -3,6 +3,7 @@ package responseprocessor
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/regexutil"
 	"strings"
@@ -91,8 +92,8 @@ func (s *Service) processPayload(mockConfig *domain.MockConfiguration) error {
 
 		variableName, replaceContent := analyseVariable(variable[0])
 
-		if variableValue, ok := mockConfig.MockVariables[variableContext[0][1]][variableName].(string); ok {
-			body = strings.Replace(body, replaceContent, variableValue, 1)
+		if variableValue, ok := mockConfig.MockVariables[variableContext[0][1]][variableName]; ok {
+			body = strings.Replace(body, replaceContent, fmt.Sprintf("%v", variableValue), 1)
 		} else {
 			body = strings.Replace(body, replaceContent, "", 1)
 		}

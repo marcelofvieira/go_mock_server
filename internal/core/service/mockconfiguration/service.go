@@ -54,13 +54,15 @@ func (s *Service) AddNewMockConfiguration(ctx context.Context, mockConfig domain
 	return mockConfig, nil
 }
 
-func (s *Service) UpdateMockConfiguration(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
+func (s *Service) UpdateMockConfiguration(ctx context.Context, mockConfig domain.MockConfiguration, id int) (domain.MockConfiguration, error) {
 	mockConfig, err := s.mockRequestPreProcessor.ProcessMockParameters(ctx, mockConfig)
 	if err != nil {
 		return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "Error to process request params")
 	}
 
-	mockConfig, err = s.mockRepository.Save(ctx, mockConfig)
+	mockConfig.Id = id
+
+	mockConfig, err = s.mockRepository.Update(ctx, mockConfig)
 	if err != nil {
 		return domain.MockConfiguration{}, errors.New("update mock configuration into repository has failed")
 	}

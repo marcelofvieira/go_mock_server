@@ -9,7 +9,7 @@ import (
 type MockConfigurationService interface {
 	GetMockConfigById(context.Context, int) (domain.MockConfiguration, error)
 	AddNewMockConfiguration(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
-	UpdateMockConfiguration(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
+	UpdateMockConfiguration(context.Context, domain.MockConfiguration, int) (domain.MockConfiguration, error)
 	DeleteMockConfiguration(context.Context, int) error
 }
 
