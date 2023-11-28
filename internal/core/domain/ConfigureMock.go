@@ -2,6 +2,7 @@ package domain
 
 const (
 	ConfigResponseDelay = "response_delay"
+	ShowMockInformation = "show_info"
 )
 
 type MockConfiguration struct {
@@ -25,11 +26,11 @@ type RequestMock struct {
 	Headers         map[string]interface{} `json:"headers,omitempty"`
 	QueryParameters map[string]interface{} `json:"query_parameters,omitempty"`
 	Body            interface{}            `json:"body,omitempty"`
-	PreparedBody    interface{}            `json:"prepared_body,omitempty"`
 	Configuration   map[string]interface{} `json:"configuration,omitempty"`
 }
 
 type Regex struct {
+	Count           int               `json:"count,omitempty"`
 	URL             string            `json:"url,omitempty"`
 	Headers         map[string]string `json:"headers,omitempty"`
 	QueryParameters map[string]string `json:"query_parameters,omitempty"`

@@ -1,6 +1,7 @@
 package requestfilter
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -50,10 +51,7 @@ func (s *Service) FilterMockHandlersByRequest(ctx context.Context, request *http
 		return domain.MockConfiguration{}, apperrors.New(apperrors.NotFound, nil, "not found handler")
 	}
 
-	//TODO: Sort resutlt
-	//TODO: Find the best match
-
-	return filteredMockConfigurations[0], nil
+	return getBestResult(filteredMockConfigurations), nil
 }
 
 func filterByMethodAndPath(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
@@ -134,15 +132,15 @@ func filterByHeader(request *http.Request, configuration domain.MockConfiguratio
 
 func filterByBody(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
 	body, err := io.ReadAll(request.Body)
-
 	if err != nil {
 		logger.Error("Error reading body", err)
 		return domain.MockConfiguration{}, false
 	}
 
-	requestBody := prepareBody(string(body))
+	//set body again
+	request.Body = io.NopCloser(bytes.NewBuffer(body))
 
-	configuration.Request.PreparedBody = requestBody
+	requestBody := prepareBody(string(body))
 
 	jsonBytes, err := json.Marshal(configuration.Request.Body)
 	if err != nil {
@@ -175,4 +173,41 @@ func prepareBody(body string) string {
 	}
 
 	return body
+}
+
+// Best Result Order
+// 1. Specialized with greater ID
+// 2. Specialized
+// 3. Generic with less regex variables
+// 4. Generic with greater ID
+// 5. Generic
+func getBestResult(mockConfigs []domain.MockConfiguration) domain.MockConfiguration {
+
+	bestIndex := -1
+
+	for index, mockConfig := range mockConfigs {
+
+		if bestIndex == -1 {
+			bestIndex = index
+		}
+
+		if mockConfig.Request.Regex.Count == 0 {
+			if mockConfig.Id > mockConfigs[bestIndex].Id {
+				bestIndex = index
+			}
+
+		} else {
+
+			if mockConfig.Request.Regex.Count < mockConfigs[bestIndex].Request.Regex.Count {
+				bestIndex = index
+			} else {
+				if mockConfig.Request.Regex.Count == mockConfigs[bestIndex].Request.Regex.Count &&
+					mockConfig.Id > mockConfigs[bestIndex].Id {
+					bestIndex = index
+				}
+			}
+		}
+	}
+
+	return mockConfigs[bestIndex]
 }

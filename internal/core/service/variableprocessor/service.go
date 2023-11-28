@@ -1,8 +1,10 @@
 package variableprocessor
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/regexutil"
@@ -31,7 +33,7 @@ func (s *Service) GetVariablesValues(ctx context.Context, request *http.Request,
 
 	getHeaderVariablesValues(request, &mockConfig)
 
-	getBodyVariablesValues(&mockConfig)
+	getBodyVariablesValues(request, &mockConfig)
 
 	return mockConfig, nil
 
@@ -116,13 +118,22 @@ func getHeaderVariablesValues(request *http.Request, mockConfig *domain.MockConf
 	}
 }
 
-func getBodyVariablesValues(mockConfig *domain.MockConfiguration) {
+func getBodyVariablesValues(request *http.Request, mockConfig *domain.MockConfiguration) {
 
 	if len(mockConfig.MockVariables[BodyVariable]) == 0 {
 		return
 	}
 
-	requestBody := mockConfig.Request.PreparedBody
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		logger.Error("Error reading body", err)
+		return
+	}
+
+	//set body again to request
+	request.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	requestBody := prepareBody(string(body))
 
 	jsonBytes, err := json.Marshal(mockConfig.Request.Body)
 	if err != nil {
@@ -137,7 +148,7 @@ func getBodyVariablesValues(mockConfig *domain.MockConfiguration) {
 		return
 	}
 
-	found, variablesValue := regexutil.FindStringValuesRegex(mockConfig.Request.Regex.Body.(string), requestBody.(string))
+	found, variablesValue := regexutil.FindStringValuesRegex(mockConfig.Request.Regex.Body.(string), requestBody)
 	if !found {
 		return
 	}

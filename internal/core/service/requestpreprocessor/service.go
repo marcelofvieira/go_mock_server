@@ -23,9 +23,6 @@ const (
 
 func (s *Service) ProcessMockParameters(ctx context.Context, mockConfig domain.MockConfiguration) (domain.MockConfiguration, error) {
 
-	//Deprecated
-	//processMockVariables(&mockConfig)
-
 	processUserVariables(&mockConfig)
 
 	processUrlVariables(&mockConfig)
@@ -60,20 +57,6 @@ func processUserVariables(mockConfig *domain.MockConfiguration) {
 	}
 }
 
-/*
-func processMockVariables(mockConfig *domain.MockConfiguration) {
-	mockVariables := mockConfig.MockVariables
-
-	mockConfig.MockVariables = nil
-
-	for contextKey, contextVariables := range mockVariables {
-		for key, value := range contextVariables {
-			addVariableControl(mockConfig, key, value, contextKey)
-		}
-	}
-}
-*/
-
 func processUrlVariables(mockConfig *domain.MockConfiguration) {
 
 	URL := mockConfig.Request.URL
@@ -91,6 +74,9 @@ func processUrlVariables(mockConfig *domain.MockConfiguration) {
 		}
 
 		mockConfig.Request.Regex.URL = URL + regexutil.FindToFinalPattern
+
+		mockConfig.Request.Regex.Count += len(variables)
+
 	}
 }
 
@@ -115,6 +101,8 @@ func processQueryVariables(mockConfig *domain.MockConfiguration) {
 			}
 
 			mockConfig.Request.Regex.QueryParameters[parameterName] = value + regexutil.FindToFinalPattern
+
+			mockConfig.Request.Regex.Count += len(variables)
 		}
 	}
 }
@@ -140,6 +128,8 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 			}
 
 			mockConfig.Request.Regex.Headers[headerName] = value + regexutil.FindToFinalPattern
+
+			mockConfig.Request.Regex.Count += len(variables)
 		}
 	}
 }
@@ -161,5 +151,7 @@ func processBodyVariables(mockConfig *domain.MockConfiguration) {
 		}
 
 		mockConfig.Request.Regex.Body = body + regexutil.FindToFinalPattern
+
+		mockConfig.Request.Regex.Count += len(variables)
 	}
 }

@@ -84,6 +84,20 @@ func processMockHeaders(mockConfig domain.MockConfiguration) map[string]string {
 		headers[key], _ = value.(string)
 	}
 
+	config, _ := interfaceutils.GetToString(mockConfig.Response.Configuration[domain.ShowMockInformation])
+
+	showConfig, err := strconv.ParseBool(config)
+	if err != nil {
+		showConfig = false
+	}
+
+	if showConfig {
+		headers["Mock-Id"] = strconv.Itoa(mockConfig.Id)
+		headers["Mock-name"] = mockConfig.Info.TestName
+		headers["Mock-Group"] = mockConfig.Info.TestGroup
+		headers["Mock-Regex-Process"] = strconv.Itoa(mockConfig.Request.Regex.Count)
+	}
+
 	return headers
 }
 
