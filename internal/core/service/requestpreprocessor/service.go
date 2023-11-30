@@ -3,8 +3,8 @@ package requestpreprocessor
 import (
 	"context"
 	"mock_server_mux/internal/core/domain"
-	"mock_server_mux/pkg/interfaceutils"
 	"mock_server_mux/pkg/regexutil"
+	"mock_server_mux/pkg/requestutil"
 	"strings"
 )
 
@@ -136,22 +136,26 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
 func processBodyVariables(mockConfig *domain.MockConfiguration) {
 
-	body, _ := interfaceutils.GetToString(mockConfig.Request.Body)
+	mockBody, err := requestutil.MockBodyToString(mockConfig.Request.Body)
+	if err != nil {
+		return
+	}
 
-	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, body)
+	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, mockBody)
 	if !found {
 		return
 	}
 
 	if len(variables) > 0 {
 		for _, variable := range variables {
-			body = strings.Replace(body, variable[0], regexutil.FindVariableValuePattern, 1)
+			mockBody = strings.Replace(mockBody, variable[0], regexutil.FindVariableValuePattern, 1)
 
 			addVariableControl(mockConfig, variable[1], variable[0], BodyVariable)
+
+			mockConfig.Request.Regex.Count++
 		}
 
-		mockConfig.Request.Regex.Body = body + regexutil.FindToFinalPattern
+		mockConfig.Request.Regex.Body = mockBody + regexutil.FindToFinalPattern
 
-		mockConfig.Request.Regex.Count += len(variables)
 	}
 }

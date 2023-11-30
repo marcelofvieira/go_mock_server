@@ -2,10 +2,10 @@ package responseprocessor
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/regexutil"
+	"mock_server_mux/pkg/requestutil"
 	"strings"
 )
 
@@ -71,12 +71,10 @@ func (s *Service) processPayload(mockConfig *domain.MockConfiguration) error {
 		return nil
 	}
 
-	json, err := json.Marshal(mockConfig.Response.Body)
+	body, err := requestutil.MockBodyToString(mockConfig.Response.Body)
 	if err != nil {
 		return err
 	}
-
-	body := string(json)
 
 	found, variables := regexutil.FindStringValuesRegex(regexutil.FindResponseVariablePattern, body)
 	if !found {

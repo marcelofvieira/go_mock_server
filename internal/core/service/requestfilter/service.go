@@ -1,14 +1,12 @@
 package requestfilter
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"io"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/regexutil"
+	"mock_server_mux/pkg/requestutil"
 	"mock_server_mux/pkg/stringutils"
 	"net/http"
 )
@@ -131,27 +129,24 @@ func filterByHeader(request *http.Request, configuration domain.MockConfiguratio
 }
 
 func filterByBody(request *http.Request, configuration domain.MockConfiguration) (domain.MockConfiguration, bool) {
-	body, err := io.ReadAll(request.Body)
+
+	requestBody, err := requestutil.ReadBodyToString(request)
 	if err != nil {
 		logger.Error("Error reading body", err)
 		return domain.MockConfiguration{}, false
 	}
 
-	//set body again
-	request.Body = io.NopCloser(bytes.NewBuffer(body))
+	requestBody = prepareBody(requestBody)
 
-	requestBody := prepareBody(string(body))
-
-	jsonBytes, err := json.Marshal(configuration.Request.Body)
+	mockBody, err := requestutil.MockBodyToString(configuration.Request.Body)
 	if err != nil {
 		logger.Error("Error encoding to JSON", err)
 		return domain.MockConfiguration{}, false
 	}
 
-	mockBody := prepareBody(string(jsonBytes))
+	mockBody = prepareBody(mockBody)
 
 	if requestBody != mockBody {
-
 		mockBody, _ = configuration.Request.Regex.Body.(string)
 
 		if !regexutil.FindStringRegex(mockBody, requestBody) {

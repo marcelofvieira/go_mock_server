@@ -1,13 +1,11 @@
 package variableprocessor
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"io"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/logger"
 	"mock_server_mux/pkg/regexutil"
+	"mock_server_mux/pkg/requestutil"
 	"mock_server_mux/pkg/stringutils"
 	"net/http"
 )
@@ -124,24 +122,20 @@ func getBodyVariablesValues(request *http.Request, mockConfig *domain.MockConfig
 		return
 	}
 
-	body, err := io.ReadAll(request.Body)
+	requestBody, err := requestutil.ReadBodyToString(request)
 	if err != nil {
 		logger.Error("Error reading body", err)
 		return
 	}
 
-	//set body again to request
-	request.Body = io.NopCloser(bytes.NewBuffer(body))
+	requestBody = prepareBody(requestBody)
 
-	requestBody := prepareBody(string(body))
-
-	jsonBytes, err := json.Marshal(mockConfig.Request.Body)
+	mockBody, err := requestutil.MockBodyToString(mockConfig.Request.Body)
 	if err != nil {
-		logger.Error("Error encoding to JSON", err)
 		return
 	}
 
-	mockBody := prepareBody(string(jsonBytes))
+	mockBody = prepareBody(mockBody)
 
 	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, mockBody)
 	if !found {

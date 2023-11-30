@@ -44,7 +44,7 @@ func Success(w http.ResponseWriter, r *http.Request, statusCode int, body interf
 	w.WriteHeader(statusCode)
 
 	if body != nil {
-		jsonResp, err := json.Marshal(body)
+		jsonResp, err := json.MarshalIndent(body, "", "\t")
 		if err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func Error(w http.ResponseWriter, r *http.Request, statusCode int, err error) er
 		Message: err.Error(),
 	}
 
-	jsonResp, err := json.Marshal(responseError)
+	jsonResp, err := json.MarshalIndent(responseError, "", "\t")
 	if err != nil {
 		return err
 	}

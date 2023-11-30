@@ -5,6 +5,7 @@ import (
 )
 
 func GetBytes(value interface{}) ([]byte, error) {
+
 	data, err := json.Marshal(value)
 	if err != nil {
 		return nil, err

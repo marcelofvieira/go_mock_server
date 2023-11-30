@@ -5,11 +5,12 @@ import "regexp"
 const (
 	FindResponseVariablePattern = "[\\$]?[\\$(NB)]{(.+?)}"
 	FindVariableContextPattern  = "[\\$]?[\\$(NB)]{([a-zA-Z0-9]+)\\."
-	FindVariablePattern         = "\\{([^{}]+)\\}"
-	FindBodyVariablePattern     = "\\{([^{}]+)\\}"
-	FindVariableValuePattern    = "([^/]+)"
-	FindToFinalPattern          = "+$"
-
+	//FindVariablePattern         = "\\{([^{}]+)\\}"
+	//FindBodyVariablePattern     = "\\{([^{}]+)\\}"
+	FindVariablePattern      = "\\{{(.+?)\\}}"
+	FindBodyVariablePattern  = "\\{{(.+?)\\}}"
+	FindVariableValuePattern = "([^/]+)"
+	FindToFinalPattern       = "+$"
 	//Locate to variables to work with number or boolean
 	FindNumberBooleanVariablePattern = "[(NB)]{"
 )
