@@ -1,0 +1,58 @@
+curl --location 'http://localhost:8080/mock-config' \
+--header 'Content-Type: application/json' \
+--data '{
+    "info": {
+        "test_group": "Default",
+        "test_name": "Mock Test"
+    },
+    "request": {
+        "method": "POST",
+
+        "url": "/test/{site}/{userid}",
+
+        "query_parameters": {
+            "caller.id": "{caller.id}"
+        },
+
+        "headers": {
+            "Content-Type": "application/json",
+            "caller.id": "{caller.id}"
+        },
+
+        "body": {
+            "{field_user_id}": "{id}"
+        }
+    },
+
+    "response": {
+        "configuration": {
+            "response_delay": 500,
+            "show_info": true
+        },
+
+        "status": 200,
+
+        "headers": {
+            "Content-Type": "application/json",
+            "caller.id": "${header.caller.id}"
+        },
+
+        "body": {
+            "country": "${site.name}",
+            "id": "123456",
+            "idn": 123456,
+            "message": "response test 4",
+            "is_valid": "$B{local.v_false}"
+        }
+    },
+    "variables": {
+        "site": {
+            "id" : "mlb",
+            "name": "Brazil - test"
+        },
+        "local": {
+            "v_true" : true,
+            "v_false": false
+        }
+    }
+}'
