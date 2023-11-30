@@ -1,0 +1,10 @@
+curl --location 'http://localhost:8080/test/mlb/65464?caller.id=123456' \
+--header 'Content-Type: application/json' \
+--header 'caller.id: 12321312' \
+--data '{
+    "user_id": "12345",
+    "teste": {
+        "id": 123,
+        "id2": 123
+    }
+}'

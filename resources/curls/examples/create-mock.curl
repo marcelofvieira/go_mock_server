@@ -47,8 +47,7 @@ curl --location 'http://localhost:8080/mock-config' \
             "idn": 123456,
             "message": "response test 4",
             "is_valid": "$B{local.v_false}",
-            "teste": "${body.id}"
-
+            "test": "${body.id}"
         }
     },
     "variables": {
