@@ -38,7 +38,8 @@ func SetRoutes() error {
 	filterHandlerService := requestfilter.NewService()
 	responseProcessorService := responseprocessor.NewService()
 	mockProcessorService := variableprocessor.NewService()
-	processorService := dynamichandlerprocessor.NewService(mockConfigRepository, filterHandlerService, mockProcessorService, responseProcessorService)
+	processorService := dynamichandlerprocessor.
+		NewService(mockConfigRepository, filterHandlerService, mockProcessorService, responseProcessorService)
 
 	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
 
