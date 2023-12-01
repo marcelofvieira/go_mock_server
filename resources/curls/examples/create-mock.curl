@@ -21,7 +21,7 @@ curl --location 'http://localhost:8080/mock-config' \
 
         "body": {
             "user_id": "{{id}}",
-            "teste": {
+            "test": {
                 "id": 123,
                 "id2": 123
             }
@@ -50,6 +50,7 @@ curl --location 'http://localhost:8080/mock-config' \
             "test": "${body.id}"
         }
     },
+
     "variables": {
         "site": {
             "id" : "mlb",
