@@ -148,6 +148,10 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 
 	if requestBody != mockBody {
 
+		if configuration.Request.Regex.Body == nil {
+			return domain.MockConfiguration{}, false
+		}
+
 		mockBody = prepareBody(configuration.Request.Regex.Body.(string), false)
 
 		if !regexutil.FindStringRegex(mockBody, requestBody) {
