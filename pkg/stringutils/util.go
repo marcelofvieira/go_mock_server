@@ -17,6 +17,10 @@ func RemoveSpaces(str string) string {
 	return strings.ReplaceAll(str, " ", "")
 }
 
+func RemoveParenthesis(str string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(str, "(", "\\("), ")", "\\)")
+}
+
 func BetweenPosition(value string, a int, b int) string {
 	return value[a:b]
 }

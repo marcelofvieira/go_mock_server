@@ -128,21 +128,21 @@ func getBodyVariablesValues(request *http.Request, mockConfig *domain.MockConfig
 		return
 	}
 
-	requestBody = prepareBody(requestBody)
+	requestBody = prepareBody(requestBody, false)
 
 	mockBody, err := requestutil.MockBodyToString(mockConfig.Request.Body)
 	if err != nil {
 		return
 	}
 
-	mockBody = prepareBody(mockBody)
+	mockBody = prepareBody(mockBody, true)
 
 	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, mockBody)
 	if !found {
 		return
 	}
 
-	found, variablesValue := regexutil.FindStringValuesRegex(mockConfig.Request.Regex.Body.(string), requestBody)
+	found, variablesValue := regexutil.FindStringValuesRegex(prepareBody(mockConfig.Request.Regex.Body.(string), false), requestBody)
 	if !found {
 		return
 	}
@@ -154,11 +154,15 @@ func getBodyVariablesValues(request *http.Request, mockConfig *domain.MockConfig
 
 }
 
-func prepareBody(body string) string {
+func prepareBody(body string, workParenthesis bool) string {
 
 	body = stringutils.ReplaceTabsToSpaces(body)
 	body = stringutils.ReplaceNewLinesToSpaces(body)
 	body = stringutils.RemoveSpaces(body)
+
+	if workParenthesis {
+		body = stringutils.RemoveParenthesis(body)
+	}
 
 	if body == "null" {
 		return ""

@@ -5,6 +5,7 @@ import (
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/regexutil"
 	"mock_server_mux/pkg/requestutil"
+	"mock_server_mux/pkg/stringutils"
 	"strings"
 )
 
@@ -147,6 +148,8 @@ func processBodyVariables(mockConfig *domain.MockConfiguration) {
 	}
 
 	if len(variables) > 0 {
+		mockBody = stringutils.RemoveParenthesis(mockBody)
+
 		for _, variable := range variables {
 			mockBody = strings.Replace(mockBody, variable[0], regexutil.FindVariableValuePattern, 1)
 
@@ -156,6 +159,5 @@ func processBodyVariables(mockConfig *domain.MockConfiguration) {
 		}
 
 		mockConfig.Request.Regex.Body = mockBody + regexutil.FindToFinalPattern
-
 	}
 }

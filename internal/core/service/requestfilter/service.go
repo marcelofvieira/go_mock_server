@@ -136,7 +136,7 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 		return domain.MockConfiguration{}, false
 	}
 
-	requestBody = prepareBody(requestBody)
+	requestBody = prepareBody(requestBody, false)
 
 	mockBody, err := requestutil.MockBodyToString(configuration.Request.Body)
 	if err != nil {
@@ -144,10 +144,11 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 		return domain.MockConfiguration{}, false
 	}
 
-	mockBody = prepareBody(mockBody)
+	mockBody = prepareBody(mockBody, false)
 
 	if requestBody != mockBody {
-		mockBody, _ = configuration.Request.Regex.Body.(string)
+
+		mockBody = prepareBody(configuration.Request.Regex.Body.(string), false)
 
 		if !regexutil.FindStringRegex(mockBody, requestBody) {
 			return domain.MockConfiguration{}, false
@@ -157,11 +158,15 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 	return configuration, true
 }
 
-func prepareBody(body string) string {
+func prepareBody(body string, workParenthesis bool) string {
 
 	body = stringutils.ReplaceTabsToSpaces(body)
 	body = stringutils.ReplaceNewLinesToSpaces(body)
 	body = stringutils.RemoveSpaces(body)
+
+	if workParenthesis {
+		body = stringutils.RemoveParenthesis(body)
+	}
 
 	if body == "null" {
 		return ""
