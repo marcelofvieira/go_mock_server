@@ -21,11 +21,11 @@ func SetRoutes() error {
 	// ----------------------------------------------------------------------------------------------------------------
 	// Mock Configuration Handler
 	// ----------------------------------------------------------------------------------------------------------------
-	mockConfigRepository := memorykvs.NewMemKVS()
-	mockRequestPreProcessorService := requestpreprocessor.NewService()
-	configMockService := mockconfiguration.NewService(mockConfigRepository, mockRequestPreProcessorService)
+	repository := memorykvs.NewMemKVS()
+	mockRequestPreProcessor := requestpreprocessor.NewService()
+	mockConfiguration := mockconfiguration.NewService(repository, mockRequestPreProcessor)
 
-	mockConfigHandler := mockconfighandler.NewHTTPHandler(configMockService)
+	mockConfigHandler := mockconfighandler.NewHTTPHandler(mockConfiguration)
 
 	router.HandleFunc("/mock-config/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")
 	router.HandleFunc("/mock-config", mockConfigHandler.AddMockConfiguration).Methods("POST")
@@ -35,13 +35,12 @@ func SetRoutes() error {
 	// ----------------------------------------------------------------------------------------------------------------
 	// Dynamic Handler
 	// ----------------------------------------------------------------------------------------------------------------
-	filterHandlerService := requestfilter.NewService()
-	responseProcessorService := responseprocessor.NewService()
-	mockProcessorService := variableprocessor.NewService()
-	processorService := dynamichandlerprocessor.
-		NewService(mockConfigRepository, filterHandlerService, mockProcessorService, responseProcessorService)
+	filterHandler := requestfilter.NewService()
+	variableProcessor := variableprocessor.NewService()
+	responseProcessor := responseprocessor.NewService()
+	dynamicHandlerProcessor := dynamichandlerprocessor.NewService(repository, filterHandler, variableProcessor, responseProcessor)
 
-	dynamicHandler := dynamichandler.NewHTTPHandler(processorService)
+	dynamicHandler := dynamichandler.NewHTTPHandler(dynamicHandlerProcessor)
 
 	router.NotFoundHandler = http.HandlerFunc(dynamicHandler.ProcessDynamicHandler)
 
