@@ -25,10 +25,10 @@ type RequestFilterService interface {
 	FilterMockHandlersByRequest(context.Context, *http.Request, []domain.MockConfiguration) (domain.MockConfiguration, error)
 }
 
-type MockProcessorService interface {
+type VariableProcessorService interface {
 	GetVariablesValues(context.Context, *http.Request, domain.MockConfiguration) (domain.MockConfiguration, error)
 }
 
-type MockResponseProcessor interface {
+type ResponseProcessor interface {
 	ProcessMockResponse(context.Context, domain.MockConfiguration) (domain.MockConfiguration, error)
 }

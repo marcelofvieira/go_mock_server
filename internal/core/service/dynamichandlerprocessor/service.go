@@ -9,22 +9,22 @@ import (
 )
 
 type Service struct {
-	mockRepository       ports.MockConfigurationRepository
-	requestFilterService ports.RequestFilterService
-	mockProcessorService ports.MockProcessorService
-	processMockResponse  ports.MockResponseProcessor
+	mockRepository           ports.MockConfigurationRepository
+	requestFilterService     ports.RequestFilterService
+	variableProcessorService ports.VariableProcessorService
+	processMockResponse      ports.ResponseProcessor
 }
 
 func NewService(mockRepository ports.MockConfigurationRepository,
 	requestFilterService ports.RequestFilterService,
-	mockProcessorService ports.MockProcessorService,
-	processMockResponse ports.MockResponseProcessor) *Service {
+	variableProcessorService ports.VariableProcessorService,
+	processMockResponse ports.ResponseProcessor) *Service {
 
 	return &Service{
-		mockRepository:       mockRepository,
-		requestFilterService: requestFilterService,
-		mockProcessorService: mockProcessorService,
-		processMockResponse:  processMockResponse,
+		mockRepository:           mockRepository,
+		requestFilterService:     requestFilterService,
+		variableProcessorService: variableProcessorService,
+		processMockResponse:      processMockResponse,
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *Service) ProcessDynamicHandler(ctx context.Context, request *http.Reque
 		}
 	}
 
-	mockConfig, err = s.mockProcessorService.GetVariablesValues(ctx, request, mockConfig)
+	mockConfig, err = s.variableProcessorService.GetVariablesValues(ctx, request, mockConfig)
 	if err != nil {
 		return domain.MockConfiguration{}, apperrors.New(apperrors.InternalServerError, err, "internal server error")
 	}
