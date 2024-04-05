@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"mock_server_mux/internal/core/domain"
-	"mock_server_mux/pkg/regexutil"
-	"mock_server_mux/pkg/requestutil"
+	"mock_server_mux/pkg/utils/regex"
+	"mock_server_mux/pkg/utils/request"
 	"strings"
 )
 
@@ -40,14 +40,14 @@ func (s *Service) processHeaders(mockConfig *domain.MockConfiguration) error {
 
 		value, _ := headerValue.(string)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindResponseVariablePattern, value)
+		found, variables := regex.FindStringValuesRegex(regex.FindResponseVariablePattern, value)
 		if !found {
 			continue
 		}
 
 		for _, variable := range variables {
 
-			found, variableContext := regexutil.FindStringValuesRegex(regexutil.FindVariableContextPattern, variable[0])
+			found, variableContext := regex.FindStringValuesRegex(regex.FindVariableContextPattern, variable[0])
 			if !found {
 				continue
 			}
@@ -71,19 +71,19 @@ func (s *Service) processPayload(mockConfig *domain.MockConfiguration) error {
 		return nil
 	}
 
-	body, err := requestutil.MockBodyToString(mockConfig.Response.Body)
+	body, err := request.MockBodyToString(mockConfig.Response.Body)
 	if err != nil {
 		return err
 	}
 
-	found, variables := regexutil.FindStringValuesRegex(regexutil.FindResponseVariablePattern, body)
+	found, variables := regex.FindStringValuesRegex(regex.FindResponseVariablePattern, body)
 	if !found {
 		return nil
 	}
 
 	for _, variable := range variables {
 
-		found, variableContext := regexutil.FindStringValuesRegex(regexutil.FindVariableContextPattern, variable[0])
+		found, variableContext := regex.FindStringValuesRegex(regex.FindVariableContextPattern, variable[0])
 		if !found {
 			continue
 		}
@@ -110,12 +110,12 @@ func analyseVariable(variable string) (string, string) {
 	variableName = variable
 	replaceContent = variable
 
-	found, _ := regexutil.FindStringValuesRegex(regexutil.FindNumberBooleanVariablePattern, variable)
+	found, _ := regex.FindStringValuesRegex(regex.FindNumberBooleanVariablePattern, variable)
 	if !found {
 		return variableName, replaceContent
 	}
 
-	found, variableInfo := regexutil.FindStringValuesRegex(regexutil.FindResponseVariablePattern, variable)
+	found, variableInfo := regex.FindStringValuesRegex(regex.FindResponseVariablePattern, variable)
 	if !found {
 		return variableName, replaceContent
 	}

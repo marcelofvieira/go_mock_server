@@ -7,11 +7,12 @@ const (
 	FindVariableContextPattern  = "[\\$]?[\\$(NB)]{([a-zA-Z0-9]+)\\."
 	//FindVariablePattern         = "\\{([^{}]+)\\}"
 	//FindBodyVariablePattern     = "\\{([^{}]+)\\}"
-	FindVariablePattern      = "\\{{(.+?)\\}}"
-	FindBodyVariablePattern  = "\\{{(.+?)\\}}"
-	FindVariableValuePattern = "([^/]+)"
-	FindToFinalPattern       = "+$"
-	//Locate to variables to work with number or boolean
+	FindVariablePattern = "\\{{(.+?)\\}}"
+	//FindBodyVariablePattern              = "\\{{(.+?)\\}}"
+	FindBodyVariablePattern = "\"[\\$]?[\\$(NB)]{{(.+?)}}\"|{{(.+?)}}"
+	//FindVariableValuePattern         = "([^/]+)"
+	FindVariableValuePattern         = "([^\"]+)"
+	FindToFinalPattern               = "+$"
 	FindNumberBooleanVariablePattern = "[(NB)]{"
 )
 

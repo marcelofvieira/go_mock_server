@@ -1,4 +1,4 @@
-package interfaceutils
+package _interface
 
 import (
 	"encoding/json"

@@ -3,9 +3,9 @@ package requestpreprocessor
 import (
 	"context"
 	"mock_server_mux/internal/core/domain"
-	"mock_server_mux/pkg/regexutil"
-	"mock_server_mux/pkg/requestutil"
-	"mock_server_mux/pkg/stringutils"
+	"mock_server_mux/pkg/utils/regex"
+	"mock_server_mux/pkg/utils/request"
+	stringutil "mock_server_mux/pkg/utils/string"
 	"strings"
 )
 
@@ -62,19 +62,19 @@ func processUrlVariables(mockConfig *domain.MockConfiguration) {
 
 	URL := mockConfig.Request.URL
 
-	found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, URL)
+	found, variables := regex.FindStringValuesRegex(regex.FindVariablePattern, URL)
 	if !found {
 		return
 	}
 
 	if len(variables) > 0 {
 		for _, variable := range variables {
-			URL = strings.Replace(URL, variable[0], regexutil.FindVariableValuePattern, 1)
+			URL = strings.Replace(URL, variable[0], regex.FindVariableValuePattern, 1)
 
 			addVariableControl(mockConfig, variable[1], variable[0], PathVariable)
 		}
 
-		mockConfig.Request.Regex.URL = URL + regexutil.FindToFinalPattern
+		mockConfig.Request.Regex.URL = URL + regex.FindToFinalPattern
 
 		mockConfig.Request.Regex.Count += len(variables)
 
@@ -87,21 +87,24 @@ func processQueryVariables(mockConfig *domain.MockConfiguration) {
 
 		value, _ := parameterValue.(string)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, value)
+		found, variables := regex.FindStringValuesRegex(regex.FindVariablePattern, value)
 		if !found {
 			continue
 		}
 
 		if len(variables) > 0 {
-			mockConfig.Request.Regex.QueryParameters = make(map[string]string)
+
+			if mockConfig.Request.Regex.QueryParameters == nil {
+				mockConfig.Request.Regex.QueryParameters = make(map[string]string)
+			}
 
 			for _, variable := range variables {
-				value = strings.Replace(value, variable[0], regexutil.FindVariableValuePattern, 1)
+				value = strings.Replace(value, variable[0], regex.FindVariableValuePattern, 1)
 
 				addVariableControl(mockConfig, variable[1], variable[0], QueryVariable)
 			}
 
-			mockConfig.Request.Regex.QueryParameters[parameterName] = value + regexutil.FindToFinalPattern
+			mockConfig.Request.Regex.QueryParameters[parameterName] = value + regex.FindToFinalPattern
 
 			mockConfig.Request.Regex.Count += len(variables)
 		}
@@ -114,21 +117,24 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
 		value, _ := headerValue.(string)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, value)
+		found, variables := regex.FindStringValuesRegex(regex.FindVariablePattern, value)
 		if !found {
 			continue
 		}
 
 		if len(variables) > 0 {
-			mockConfig.Request.Regex.Headers = make(map[string]string)
+
+			if mockConfig.Request.Regex.Headers == nil {
+				mockConfig.Request.Regex.Headers = make(map[string]string)
+			}
 
 			for _, variable := range variables {
-				value = strings.Replace(value, variable[0], regexutil.FindVariableValuePattern, 1)
+				value = strings.Replace(value, variable[0], regex.FindVariableValuePattern, 1)
 
 				addVariableControl(mockConfig, variable[1], variable[0], HeaderVariable)
 			}
 
-			mockConfig.Request.Regex.Headers[headerName] = value + regexutil.FindToFinalPattern
+			mockConfig.Request.Regex.Headers[headerName] = value + regex.FindToFinalPattern
 
 			mockConfig.Request.Regex.Count += len(variables)
 		}
@@ -137,27 +143,39 @@ func processHeaderVariables(mockConfig *domain.MockConfiguration) {
 
 func processBodyVariables(mockConfig *domain.MockConfiguration) {
 
-	mockBody, err := requestutil.MockBodyToString(mockConfig.Request.Body)
+	mockBody, err := request.MockBodyToString(mockConfig.Request.Body)
 	if err != nil {
 		return
 	}
 
-	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, mockBody)
+	found, variables := regex.FindStringValuesRegex(regex.FindBodyVariablePattern, mockBody)
 	if !found {
 		return
 	}
 
 	if len(variables) > 0 {
-		mockBody = stringutils.RemoveParenthesis(mockBody)
+		mockBody = stringutil.RemoveParenthesis(mockBody)
 
 		for _, variable := range variables {
-			mockBody = strings.Replace(mockBody, variable[0], regexutil.FindVariableValuePattern, 1)
+			value := variable[0]
 
-			addVariableControl(mockConfig, variable[1], variable[0], BodyVariable)
+			variableName := analyzeValue(variable[1], variable[2])
+
+			mockBody = strings.Replace(mockBody, value, regex.FindVariableValuePattern, 1)
+
+			addVariableControl(mockConfig, variableName, value, BodyVariable)
 
 			mockConfig.Request.Regex.Count++
 		}
 
-		mockConfig.Request.Regex.Body = mockBody + regexutil.FindToFinalPattern
+		mockConfig.Request.Regex.Body = mockBody + regex.FindToFinalPattern
 	}
+}
+
+func analyzeValue(value1, value2 string) string {
+	if value1 == "" {
+		return value2
+	}
+
+	return value1
 }

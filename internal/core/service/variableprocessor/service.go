@@ -4,10 +4,11 @@ import (
 	"context"
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/logger"
-	"mock_server_mux/pkg/regexutil"
-	"mock_server_mux/pkg/requestutil"
-	"mock_server_mux/pkg/stringutils"
+	"mock_server_mux/pkg/utils/regex"
+	requestutil "mock_server_mux/pkg/utils/request"
+	stringutil "mock_server_mux/pkg/utils/string"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -45,12 +46,12 @@ func getURLVariablesValues(request *http.Request, mockConfig *domain.MockConfigu
 
 	URL := request.URL.Path
 
-	found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, mockConfig.Request.URL)
+	found, variables := regex.FindStringValuesRegex(regex.FindVariablePattern, mockConfig.Request.URL)
 	if !found {
 		return
 	}
 
-	found, variablesValue := regexutil.FindStringValuesRegex(mockConfig.Request.Regex.URL, URL)
+	found, variablesValue := regex.FindStringValuesRegex(mockConfig.Request.Regex.URL, URL)
 	if !found {
 		return
 	}
@@ -72,12 +73,12 @@ func getQueryParamVariablesValues(request *http.Request, mockConfig *domain.Mock
 
 		requestParamValue := request.URL.Query().Get(key)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, mockConfig.Request.QueryParameters[key].(string))
+		found, variables := regex.FindStringValuesRegex(regex.FindVariablePattern, mockConfig.Request.QueryParameters[key].(string))
 		if !found {
 			return
 		}
 
-		found, variablesValue := regexutil.FindStringValuesRegex(regexParamValue, requestParamValue)
+		found, variablesValue := regex.FindStringValuesRegex(regexParamValue, requestParamValue)
 		if !found {
 			return
 		}
@@ -99,12 +100,12 @@ func getHeaderVariablesValues(request *http.Request, mockConfig *domain.MockConf
 
 		requestHeaderValue := request.Header.Get(key)
 
-		found, variables := regexutil.FindStringValuesRegex(regexutil.FindVariablePattern, mockConfig.Request.Headers[key].(string))
+		found, variables := regex.FindStringValuesRegex(regex.FindVariablePattern, mockConfig.Request.Headers[key].(string))
 		if !found {
 			return
 		}
 
-		found, variablesValue := regexutil.FindStringValuesRegex(regexHeaderValue, requestHeaderValue)
+		found, variablesValue := regex.FindStringValuesRegex(regexHeaderValue, requestHeaderValue)
 		if !found {
 			return
 		}
@@ -137,31 +138,31 @@ func getBodyVariablesValues(request *http.Request, mockConfig *domain.MockConfig
 
 	mockBody = prepareBody(mockBody, true)
 
-	found, variables := regexutil.FindStringValuesRegex(regexutil.FindBodyVariablePattern, mockBody)
+	found, variables := regex.FindStringValuesRegex(regex.FindBodyVariablePattern, mockBody)
 	if !found {
 		return
 	}
 
-	found, variablesValue := regexutil.FindStringValuesRegex(prepareBody(mockConfig.Request.Regex.Body.(string), false), requestBody)
+	found, variablesValue := regex.FindStringValuesRegex(prepareBody(mockConfig.Request.Regex.Body.(string), false), requestBody)
 	if !found {
 		return
 	}
 
 	for i := 1; i < len(variablesValue[0]); i++ {
-		variableName := "${" + BodyVariable + "." + variables[i-1][1] + "}"
-		mockConfig.MockVariables[BodyVariable][variableName] = variablesValue[0][i]
+		variableName := "${" + BodyVariable + "." + analyseValue(variables[i-1][1], variables[i-1][2]) + "}"
+		mockConfig.MockVariables[BodyVariable][variableName] = strings.Replace(variablesValue[0][i], "\"", "", -1)
 	}
 
 }
 
 func prepareBody(body string, workParenthesis bool) string {
 
-	body = stringutils.ReplaceTabsToSpaces(body)
-	body = stringutils.ReplaceNewLinesToSpaces(body)
-	body = stringutils.RemoveSpaces(body)
+	body = stringutil.ReplaceTabsToSpaces(body)
+	body = stringutil.ReplaceNewLinesToSpaces(body)
+	body = stringutil.RemoveSpaces(body)
 
 	if workParenthesis {
-		body = stringutils.RemoveParenthesis(body)
+		body = stringutil.RemoveParenthesis(body)
 	}
 
 	if body == "null" {
@@ -169,4 +170,12 @@ func prepareBody(body string, workParenthesis bool) string {
 	}
 
 	return body
+}
+
+func analyseValue(value1, value2 string) string {
+	if value1 == "" {
+		return value2
+	} else {
+		return value1
+	}
 }

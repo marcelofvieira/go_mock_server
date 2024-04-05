@@ -5,9 +5,9 @@ import (
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
-	"mock_server_mux/pkg/interfaceutils"
 	"mock_server_mux/pkg/logger"
-	"mock_server_mux/pkg/response"
+	_interface "mock_server_mux/pkg/utils/interface"
+	"mock_server_mux/pkg/utils/response"
 	"net/http"
 	"strconv"
 	"time"
@@ -84,7 +84,7 @@ func processMockHeaders(mockConfig domain.MockConfiguration) map[string]string {
 		headers[key], _ = value.(string)
 	}
 
-	config, _ := interfaceutils.GetToString(mockConfig.Response.Configuration[domain.ShowMockInformation])
+	config, _ := _interface.GetToString(mockConfig.Response.Configuration[domain.ShowMockInformation])
 
 	showConfig, err := strconv.ParseBool(config)
 	if err != nil {
@@ -132,7 +132,7 @@ func processMockPayload(mockConfig domain.MockConfiguration) []byte {
 }
 
 func processMockDelay(mockConfig domain.MockConfiguration) {
-	delayConfig, _ := interfaceutils.GetToString(mockConfig.Response.Configuration[domain.ConfigResponseDelay])
+	delayConfig, _ := _interface.GetToString(mockConfig.Response.Configuration[domain.ConfigResponseDelay])
 
 	delay, err := strconv.Atoi(delayConfig)
 	if err != nil {

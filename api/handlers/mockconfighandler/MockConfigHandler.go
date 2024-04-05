@@ -7,7 +7,7 @@ import (
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/internal/core/ports"
 	"mock_server_mux/pkg/apperrors"
-	"mock_server_mux/pkg/response"
+	"mock_server_mux/pkg/utils/response"
 	"net/http"
 	"strconv"
 )

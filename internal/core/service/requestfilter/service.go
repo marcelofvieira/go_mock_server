@@ -5,9 +5,9 @@ import (
 	"mock_server_mux/internal/core/domain"
 	"mock_server_mux/pkg/apperrors"
 	"mock_server_mux/pkg/logger"
-	"mock_server_mux/pkg/regexutil"
-	"mock_server_mux/pkg/requestutil"
-	"mock_server_mux/pkg/stringutils"
+	"mock_server_mux/pkg/utils/regex"
+	requestutil "mock_server_mux/pkg/utils/request"
+	stringutil "mock_server_mux/pkg/utils/string"
 	"net/http"
 )
 
@@ -65,7 +65,7 @@ func filterByMethodAndPath(request *http.Request, configuration domain.MockConfi
 
 		findString := method + " " + path
 
-		if regexutil.FindStringRegex(pattern, findString) {
+		if regex.FindStringRegex(pattern, findString) {
 			return configuration, true
 		}
 	}
@@ -87,7 +87,7 @@ func filterByQueryParam(request *http.Request, configuration domain.MockConfigur
 
 			if regexValue, ok := configuration.Request.Regex.QueryParameters[key]; ok {
 
-				if !regexutil.FindStringRegex(regexValue, queryParamValue) {
+				if !regex.FindStringRegex(regexValue, queryParamValue) {
 					return domain.MockConfiguration{}, false
 				}
 
@@ -114,7 +114,7 @@ func filterByHeader(request *http.Request, configuration domain.MockConfiguratio
 
 			if regexValue, ok := configuration.Request.Regex.Headers[key]; ok {
 
-				if !regexutil.FindStringRegex(regexValue, headerValue) {
+				if !regex.FindStringRegex(regexValue, headerValue) {
 					return domain.MockConfiguration{}, false
 				}
 
@@ -154,7 +154,7 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 
 		mockBody = prepareBody(configuration.Request.Regex.Body.(string), false)
 
-		if !regexutil.FindStringRegex(mockBody, requestBody) {
+		if !regex.FindStringRegex(mockBody, requestBody) {
 			return domain.MockConfiguration{}, false
 		}
 	}
@@ -164,12 +164,12 @@ func filterByBody(request *http.Request, configuration domain.MockConfiguration)
 
 func prepareBody(body string, workParenthesis bool) string {
 
-	body = stringutils.ReplaceTabsToSpaces(body)
-	body = stringutils.ReplaceNewLinesToSpaces(body)
-	body = stringutils.RemoveSpaces(body)
+	body = stringutil.ReplaceTabsToSpaces(body)
+	body = stringutil.ReplaceNewLinesToSpaces(body)
+	body = stringutil.RemoveSpaces(body)
 
 	if workParenthesis {
-		body = stringutils.RemoveParenthesis(body)
+		body = stringutil.RemoveParenthesis(body)
 	}
 
 	if body == "null" {
