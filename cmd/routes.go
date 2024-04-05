@@ -15,7 +15,6 @@ import (
 )
 
 func SetRoutes() error {
-	//TODO: Define best place for router
 	router := mux.NewRouter()
 
 	// ----------------------------------------------------------------------------------------------------------------
@@ -27,10 +26,10 @@ func SetRoutes() error {
 
 	mockConfigHandler := mockconfighandler.NewHTTPHandler(mockConfiguration)
 
-	router.HandleFunc("/mock-config/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")
-	router.HandleFunc("/mock-config", mockConfigHandler.AddMockConfiguration).Methods("POST")
-	router.HandleFunc("/mock-config/{id}", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
-	router.HandleFunc("/mock-config/{id}", mockConfigHandler.DeleteMockConfiguration).Methods("DELETE")
+	router.HandleFunc("/api/v1/configurations/{id}", mockConfigHandler.GetMockConfiguration).Methods("GET")
+	router.HandleFunc("/api/v1/configurations", mockConfigHandler.AddMockConfiguration).Methods("POST")
+	router.HandleFunc("/api/v1/configurations/{id}", mockConfigHandler.UpdateMockConfiguration).Methods("PUT")
+	router.HandleFunc("/api/v1/configurations/{id}", mockConfigHandler.DeleteMockConfiguration).Methods("DELETE")
 
 	// ----------------------------------------------------------------------------------------------------------------
 	// Dynamic Handler
